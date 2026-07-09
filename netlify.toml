@@ -1,0 +1,16 @@
+# Netlify config: Vite SPA + the device-sync function (netlify/functions/).
+# Local dev with functions: `npx netlify dev` (proxies vite + functions).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# SPA fallback so react-router deep links work. Function routes under
+# /.netlify/functions/* are matched before this catch-all.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
