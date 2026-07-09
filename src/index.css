@@ -55,6 +55,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Tailwind v4 preflight sets buttons to cursor: default — restore the
+   pointer for everything clickable. */
+button:not(:disabled),
+[role='button'] {
+  cursor: pointer;
+}
+
 /* Accent helpers used throughout the app */
 .text-accent {
   color: var(--accent);

@@ -87,9 +87,11 @@ export default function StatusDropdown({ item, variant = 'card' }) {
         }}
         style={current ? { backgroundColor: category.accent } : undefined}
         className={cn(
-          'flex items-center justify-center gap-1 rounded-lg font-semibold transition-colors',
+          'flex items-center justify-center gap-1 rounded-lg font-semibold shadow-lg shadow-black/30 ring-1 transition-all',
           isDetail ? 'px-4 py-2 text-sm' : 'w-full px-2 py-1.5 text-xs',
-          current ? 'text-white' : 'bg-white/10 text-white backdrop-blur hover:bg-white/20',
+          current
+            ? 'text-white ring-white/20 hover:brightness-110'
+            : 'bg-black/60 text-white ring-white/25 backdrop-blur hover:bg-black/45 hover:ring-white/60',
         )}
       >
         {current ? (

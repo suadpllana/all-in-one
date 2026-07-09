@@ -10,11 +10,13 @@ export default function Carousel({ items, onOpen }) {
   }
 
   return (
-    <div className="group/car relative">
+    // md:px-12 reserves a gutter on both sides so the arrows sit next to the
+    // row instead of on top of the first/last card.
+    <div className="relative md:px-12">
       <button
         onClick={() => scrollBy(-1)}
         aria-label="Scroll left"
-        className="absolute -left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-[var(--color-surface)] text-lg opacity-0 shadow-lg ring-1 ring-[var(--color-border)] transition-opacity group-hover/car:opacity-100 hover:bg-[var(--color-surface-2)] md:grid"
+        className="bg-gradient-accent absolute left-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full text-lg font-bold text-white shadow-lg transition-transform hover:scale-110 md:grid"
       >
         ‹
       </button>
@@ -36,7 +38,7 @@ export default function Carousel({ items, onOpen }) {
       <button
         onClick={() => scrollBy(1)}
         aria-label="Scroll right"
-        className="absolute -right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-[var(--color-surface)] text-lg opacity-0 shadow-lg ring-1 ring-[var(--color-border)] transition-opacity group-hover/car:opacity-100 hover:bg-[var(--color-surface-2)] md:grid"
+        className="bg-gradient-accent absolute right-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full text-lg font-bold text-white shadow-lg transition-transform hover:scale-110 md:grid"
       >
         ›
       </button>

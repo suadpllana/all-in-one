@@ -59,14 +59,18 @@ async function movieByGenres(ids, signal) {
 }
 
 // ---- TV -----------------------------------------------------------------
-// Anime has its own category (Jikan/AniList), so keep it out of TV Shows:
-// drop Animation-genre shows of Japanese origin.
+// Anime and documentaries have their own categories, so keep them out of TV
+// Shows: drop Animation-genre shows of Japanese origin and anything tagged
+// with the Documentary genre.
 const ANIMATION_GENRE = 16
+const genreIdsOf = (r) => r.genre_ids || (r.genres || []).map((g) => g.id)
 const isAnime = (r) =>
-  (r.genre_ids || (r.genres || []).map((g) => g.id)).includes(ANIMATION_GENRE) &&
+  genreIdsOf(r).includes(ANIMATION_GENRE) &&
   (r.original_language === 'ja' || (r.origin_country || []).includes('JP'))
+const isDoc = (r) => genreIdsOf(r).includes(DOC_GENRE)
 
-const mapTvList = (data) => mapList('tv')(data).filter((item) => !isAnime(item.raw))
+const mapTvList = (data) =>
+  mapList('tv')(data).filter((item) => !isAnime(item.raw) && !isDoc(item.raw))
 
 async function tvTrending(signal) {
   return fetchJson(url('/trending/tv/week'), { signal }).then(mapTvList)

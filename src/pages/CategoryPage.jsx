@@ -128,8 +128,11 @@ function CategorySearchBox({ category, value, onChange, onClear }) {
 
 function Discover({ category, onOpen }) {
   const key = category.key
+  // YouTube's "trending" search surfaces mostly non-English podcasts, so that
+  // category skips the shelf (and the query) entirely.
+  const showTrending = key !== 'youtube'
   const newReleases = useSection(key, 'newReleases')
-  const trending = useSection(key, 'trending')
+  const trending = useSection(key, 'trending', showTrending)
   const topRated = useSection(key, 'topRated')
   const recommended = useRecommended(key)
 
@@ -144,7 +147,7 @@ function Discover({ category, onOpen }) {
         onOpen={onOpen}
         hideWhenEmpty
       />
-      <Section title="Trending Now" query={trending} onOpen={onOpen} />
+      {showTrending && <Section title="Trending Now" query={trending} onOpen={onOpen} />}
       <Section title="Top Rated" query={topRated} onOpen={onOpen} />
       <Section title="New Releases" query={newReleases} onOpen={onOpen} />
     </div>

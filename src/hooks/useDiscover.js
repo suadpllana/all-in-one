@@ -36,7 +36,8 @@ export function useRecommended(categoryKey) {
 function topGenres(rows) {
   const counts = new Map()
   for (const row of rows) {
-    const ids = row.metadata?.genre_ids || genreNames(row.metadata)
+    const ids =
+      row.metadata?.genreIds || row.metadata?.genre_ids || genreNames(row.metadata)
     for (const g of ids || []) counts.set(g, (counts.get(g) || 0) + 1)
   }
   return [...counts.entries()]

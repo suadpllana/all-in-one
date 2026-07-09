@@ -133,6 +133,8 @@ function computeStats(items) {
 }
 
 // Rough time-invested estimate per completed item from cached metadata.
+// Reads the slim shape (see lib/rowToItem itemToMetadata) first, falling back
+// to the legacy full-raw-payload keys for rows saved before it existed.
 function estimateMinutes(it) {
   const m = it.metadata || {}
   switch (it.category) {
@@ -140,8 +142,8 @@ function estimateMinutes(it) {
     case 'documentary':
       return m.runtime || 115
     case 'tv': {
-      const eps = m.number_of_episodes || 20
-      const run = (m.episode_run_time && m.episode_run_time[0]) || 42
+      const eps = m.episodes || m.number_of_episodes || 20
+      const run = m.runtime || (m.episode_run_time && m.episode_run_time[0]) || 42
       return eps * run
     }
     case 'anime': {
@@ -149,13 +151,14 @@ function estimateMinutes(it) {
       return eps * 24
     }
     case 'book': {
-      const pages = m.volumeInfo?.pageCount || m.pageCount || 320
+      const pages = m.pageCount || m.volumeInfo?.pageCount || 320
       return pages * 1.5 // ~1.5 min/page
     }
     case 'game':
       return (m.playtime || 12) * 60
     case 'youtube': {
-      // contentDetails.duration is present when added from the detail page.
+      if (m.runtime) return m.runtime
+      // Legacy rows: contentDetails.duration when added from the detail page.
       const d = m.contentDetails?.duration
       const parsed = d && /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(d)
       if (parsed) return Math.round(+(parsed[1] || 0) * 60 + +(parsed[2] || 0) + +(parsed[3] || 0) / 60)

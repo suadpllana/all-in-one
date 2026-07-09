@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { libraryStore } from '../lib/libraryStore'
+import { itemToMetadata } from '../lib/rowToItem'
 import { useAuth } from '../context/AuthContext'
 
 // Central hook for the user's library. Backed by react-query so status changes
@@ -50,7 +51,7 @@ export function useLibrary() {
         externalId: item.externalId,
         title: item.title,
         posterUrl: item.posterUrl,
-        raw: item.raw,
+        metadata: itemToMetadata(item),
         status,
       }),
     setRating: (item, userRating) => {
@@ -60,7 +61,7 @@ export function useLibrary() {
         externalId: item.externalId,
         title: item.title,
         posterUrl: item.posterUrl,
-        raw: item.raw,
+        metadata: itemToMetadata(item),
         status: entry?.status || 'completed',
         userRating,
       })
