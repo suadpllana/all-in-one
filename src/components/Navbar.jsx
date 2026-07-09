@@ -13,8 +13,9 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3 md:px-8">
 
 
-        {/* Category tabs — hidden on mobile (bottom nav takes over) */}
-        <nav className="hidden flex-1 items-center gap-1 md:flex">
+        {/* Category tabs — horizontally scrollable on mobile, where the
+            bottom bar holds the global search instead. */}
+        <nav className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto">
           {CATEGORIES.map((c) => (
             <NavLink
               key={c.key}
@@ -27,7 +28,7 @@ export default function Navbar() {
               }
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                  'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
                   isActive ? '' : 'text-[var(--color-muted)] hover:text-[var(--color-text)]',
                 )
               }
@@ -45,8 +46,11 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <GlobalSearch />
+        <div className="flex items-center gap-2">
+          {/* On mobile the global search lives in the bottom bar instead. */}
+          <div className="hidden md:block">
+            <GlobalSearch />
+          </div>
           <AvatarMenu />
         </div>
       </div>

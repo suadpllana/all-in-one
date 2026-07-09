@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 // Global search box. Debounces input and pushes to /search?q= which fans the
 // query out across all six categories.
-export default function GlobalSearch() {
+export default function GlobalSearch({ full = false }) {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const q = params.get('q') || ''
@@ -50,7 +50,7 @@ export default function GlobalSearch() {
         onBlur={() => setOpen(false)}
         placeholder="Search everything…"
         aria-label="Search across all categories"
-        className={cnInput(open)}
+        className={cnInput(open, full)}
       />
       <svg
         className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted)]"
@@ -66,11 +66,14 @@ export default function GlobalSearch() {
   )
 }
 
-function cnInput(open) {
+function cnInput(open, full) {
   return [
-    'w-36 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]',
+    // full: stretch to the container (mobile bottom bar); otherwise the
+    // compact grow-on-focus pill used in the top navbar.
+    full ? 'w-full' : 'w-36 focus:w-44 sm:w-48 sm:focus:w-64',
+    'rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]',
     'py-1.5 pl-8 pr-3 text-sm text-[var(--color-text)] outline-none transition-all',
-    'placeholder:text-[var(--color-muted)] focus:w-44 sm:w-48 sm:focus:w-64',
+    'placeholder:text-[var(--color-muted)]',
     open ? 'border-accent' : '',
   ].join(' ')
 }
