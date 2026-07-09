@@ -24,6 +24,11 @@ function normalize(g) {
     title: g.name || 'Untitled',
     posterUrl: g.background_image || null,
     backdropUrl: g.background_image || null,
+    // RAWG's background_image is sometimes a tiny 460px Steam capsule; the
+    // hero probes these fallbacks for an HD image before featuring a game.
+    backdropAlts: (g.short_screenshots || [])
+      .map((s) => s.image)
+      .filter((u) => u && u !== g.background_image),
     year: g.released ? Number(String(g.released).slice(0, 4)) : null,
     // RAWG `rating` is 0-5; prefer metacritic (0-100) when present.
     rating:

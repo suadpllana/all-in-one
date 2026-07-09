@@ -53,16 +53,9 @@ export default function DetailPage({ categoryKey }) {
     <div className="-mt-4">
       {/* ---- Cinematic hero ------------------------------------------- */}
       <section className="relative -mx-4 overflow-hidden md:-mx-8">
+        {/* No backdrop image — just a soft accent glow so the header still
+            carries the category's color. */}
         <div className="absolute inset-0">
-          {(d.backdropUrl || d.posterUrl) && (
-            <img
-              src={d.backdropUrl || d.posterUrl}
-              alt=""
-              className="h-full w-full scale-105 object-cover object-top blur-[2px] brightness-[.55]"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)] via-[var(--color-bg)]/70 to-[var(--color-bg)]/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg)]/90 via-transparent to-transparent" />
           <div
             className="absolute inset-x-0 bottom-0 h-40"
             style={{ background: `linear-gradient(to top, ${category.accentSoft}, transparent)` }}
@@ -150,7 +143,9 @@ export default function DetailPage({ categoryKey }) {
 
       {/* ---- Body ----------------------------------------------------- */}
       <section className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-8">
+        {/* min-w-0 lets the carousel scroll inside the 1fr column instead of
+            blowing the column out to the carousel's full content width. */}
+        <div className="min-w-0 space-y-8">
           {d.overview && (
             <div>
               <SectionTitle>Overview</SectionTitle>

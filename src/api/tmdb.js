@@ -59,26 +59,35 @@ async function movieByGenres(ids, signal) {
 }
 
 // ---- TV -----------------------------------------------------------------
+// Anime has its own category (Jikan/AniList), so keep it out of TV Shows:
+// drop Animation-genre shows of Japanese origin.
+const ANIMATION_GENRE = 16
+const isAnime = (r) =>
+  (r.genre_ids || (r.genres || []).map((g) => g.id)).includes(ANIMATION_GENRE) &&
+  (r.original_language === 'ja' || (r.origin_country || []).includes('JP'))
+
+const mapTvList = (data) => mapList('tv')(data).filter((item) => !isAnime(item.raw))
+
 async function tvTrending(signal) {
-  return fetchJson(url('/trending/tv/week'), { signal }).then(mapList('tv'))
+  return fetchJson(url('/trending/tv/week'), { signal }).then(mapTvList)
 }
 async function tvTopRated(signal) {
-  return fetchJson(url('/tv/top_rated'), { signal }).then(mapList('tv'))
+  return fetchJson(url('/tv/top_rated'), { signal }).then(mapTvList)
 }
 async function tvNew(signal) {
   const data = await fetchJson(url('/tv/on_the_air'), { signal })
-  return mapList('tv')(data).sort(
+  return mapTvList(data).sort(
     (a, b) => (b.raw.first_air_date || '').localeCompare(a.raw.first_air_date || ''),
   )
 }
 async function tvSearch(query, signal) {
-  return fetchJson(url('/search/tv', { query }), { signal }).then(mapList('tv'))
+  return fetchJson(url('/search/tv', { query }), { signal }).then(mapTvList)
 }
 async function tvByGenres(ids, signal) {
   return fetchJson(
     url('/discover/tv', { with_genres: ids.join(','), sort_by: 'popularity.desc' }),
     { signal },
-  ).then(mapList('tv'))
+  ).then(mapTvList)
 }
 
 // ---- Documentaries (movies filtered by the Documentary genre) -----------

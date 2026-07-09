@@ -3,33 +3,87 @@ import StatusDropdown from './StatusDropdown'
 import { HeroSkeleton } from './Skeleton'
 import { ErrorState } from './states'
 
+// Some sources (RAWG) return thumbnail-sized "backdrops" that turn into a
+// blurry mess stretched across the banner. Probe an image's real width so
+// sub-HD art can be skipped or swapped for an alternative.
+const MIN_BACKDROP_WIDTH = 960
+
+function probeWidth(url) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(img.naturalWidth)
+    img.onerror = () => resolve(0)
+    img.src = url
+  })
+}
+
+// First HD-width image among the item's backdrop and its alternates.
+async function bestBackdrop(item) {
+  for (const url of [item.backdropUrl, ...(item.backdropAlts || [])]) {
+    if (url && (await probeWidth(url)) >= MIN_BACKDROP_WIDTH) return url
+  }
+  return null
+}
+
 // Auto-rotating banner of the newest releases for a category.
 export default function Hero({ query, onOpen }) {
   const { data, isLoading, error, refetch } = query
   // The hero is a full-width banner, so only feature items that have a proper
-  // wide backdrop. Tall posters get cropped into an ugly zoomed strip. Fall
-  // back to the raw list if nothing has a backdrop, so it's never empty.
-  const items = data || []
-  const withBackdrop = items.filter((s) => s.backdropUrl)
-  const slides = (withBackdrop.length ? withBackdrop : items).slice(0, 5)
+  // wide, HD backdrop. Tall posters get cropped into an ugly zoomed strip and
+  // low-res art upscales blurry. Fall back to the raw list if nothing
+  // qualifies, so it's never empty.
+  const [slides, setSlides] = useState(null)
   const [i, setI] = useState(0)
+
+  useEffect(() => {
+    if (!data) return
+    let cancelled = false
+    const withBackdrop = data.filter((s) => s.backdropUrl)
+    ;(async () => {
+      const candidates = withBackdrop.slice(0, 8)
+      const probed = await Promise.all(
+        candidates.map(async (s) => {
+          const url = await bestBackdrop(s)
+          return url ? { ...s, backdropUrl: url } : null
+        }),
+      )
+      if (cancelled) return
+      const hd = probed.filter(Boolean)
+      setSlides(
+        (hd.length ? hd : withBackdrop.length ? withBackdrop : data).slice(0, 5),
+      )
+      setI(0)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [data])
   // Bumped on manual navigation so the auto-rotate timer restarts instead of
   // advancing right after the user clicked.
   const [epoch, setEpoch] = useState(0)
+  // Pause auto-rotation while the user is over the banner or reading an
+  // expanded description. Expansion is keyed to the slide index so it
+  // collapses on its own when the slide changes.
+  const [hovered, setHovered] = useState(false)
+  const [expandedIdx, setExpandedIdx] = useState(null)
+  const expanded = expandedIdx === i
+
+  const count = slides?.length || 0
 
   useEffect(() => {
-    if (slides.length < 2) return
-    const t = setInterval(() => setI((n) => (n + 1) % slides.length), 6000)
+    if (count < 2 || hovered || expanded) return
+    const t = setInterval(() => setI((n) => (n + 1) % count), 6000)
     return () => clearInterval(t)
-  }, [slides.length, epoch])
+  }, [count, epoch, hovered, expanded])
 
   const go = (dir) => {
-    setI((n) => (n + dir + slides.length) % slides.length)
+    setI((n) => (n + dir + count) % count)
     setEpoch((e) => e + 1)
   }
 
-  if (isLoading) return <HeroSkeleton />
   if (error) return <ErrorState error={error} onRetry={refetch} />
+  // Keep the skeleton up while backdrop candidates are still being probed.
+  if (isLoading || slides === null) return <HeroSkeleton />
   if (slides.length === 0) return null
 
   const active = slides[i]
@@ -39,7 +93,11 @@ export default function Hero({ query, onOpen }) {
     // trims the edges instead of slicing the image in half (the old fixed
     // 46vh made a ~3.2:1 strip on wide screens). Height clamps keep it sane
     // on very narrow/wide viewports.
-    <div className="relative aspect-[21/9] max-h-[64vh] min-h-[300px] w-full overflow-hidden rounded-2xl ring-1 ring-white/10">
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative aspect-[21/9] max-h-[64vh] min-h-[300px] w-full overflow-hidden rounded-2xl ring-1 ring-white/10"
+    >
       {slides.map((s, idx) => (
         <div
           key={s.externalId}
@@ -91,9 +149,22 @@ export default function Hero({ query, onOpen }) {
           {active.year && <span>{active.year}</span>}
           {active.rating != null && <span className="text-accent">★ {active.rating.toFixed(1)}</span>}
         </div>
-        <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">
+        <p
+          className={`max-w-xl text-sm text-white/80 md:text-base ${
+            expanded ? 'max-h-28 overflow-y-auto pr-2 md:max-h-40' : 'line-clamp-2'
+          }`}
+        >
           {active.overview}
         </p>
+        {/* ~150 chars is where two clamped lines start truncating. */}
+        {(active.overview?.length || 0) > 150 && (
+          <button
+            onClick={() => setExpandedIdx(expanded ? null : i)}
+            className="w-fit text-sm font-semibold text-accent hover:underline"
+          >
+            {expanded ? 'Show less' : 'Read more'}
+          </button>
+        )}
         <div className="flex items-center gap-2 pt-1">
           <button
             onClick={() => onOpen(active)}
