@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npx -y netlify-cli deploy --prod --build"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.9",
