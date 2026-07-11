@@ -60,7 +60,7 @@ export default function MediaCard({ item, onOpen, className }) {
             {item.title}
           </p>
           {item.overview && (
-            <p className="line-clamp-4 text-[11px] leading-relaxed text-white/85">
+            <p className="line-clamp-7 text-[11px] leading-relaxed text-white/85">
               {item.overview}
             </p>
           )}

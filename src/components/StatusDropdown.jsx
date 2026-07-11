@@ -20,7 +20,9 @@ export default function StatusDropdown({ item, variant = 'card' }) {
   const category = CATEGORY_BY_KEY[item.category]
   const options = getStatusOptions(category)
   const current = getStatus(item.category, item.externalId)
-  const currentLabel = options.find((o) => o.status === current)?.label
+  // Fallback covers statuses no longer offered for this category (e.g. a
+  // movie saved as in_progress before the option was removed).
+  const currentLabel = options.find((o) => o.status === current)?.label ?? 'Saved'
   const isDetail = variant === 'detail'
 
   // Position the portalled menu next to the trigger button.

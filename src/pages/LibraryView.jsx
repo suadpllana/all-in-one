@@ -24,7 +24,7 @@ export default function LibraryView({ category, status, statusLabel, onOpen }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {rows.map((row) => (
         <MediaCard key={row.id} item={rowToItem(row)} onOpen={onOpen} />
       ))}

@@ -28,6 +28,8 @@ export const CATEGORIES = [
     tagline: 'Lights down. Curtain up.',
     source: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    // Movies are watched in one sitting — no in-progress state.
+    noProgress: true,
   },
   {
     key: 'tv',
@@ -121,23 +123,29 @@ export const CATEGORY_BY_ROUTE = Object.fromEntries(
   CATEGORIES.map((c) => [c.route, c]),
 )
 
-// The secondary submenu shown inside every category page.
+// The secondary submenu shown inside every category page. Categories with
+// `noProgress` (e.g. movies) skip the in-progress tab.
 export function getSubmenu(category) {
-  const { verbs } = category
+  const { verbs, noProgress } = category
   return [
     { key: 'discover', label: 'Discover', status: null },
     { key: 'plan', label: verbs.plan, status: STATUS.WISHLIST },
-    { key: 'progress', label: verbs.progress, status: STATUS.IN_PROGRESS },
+    ...(noProgress
+      ? []
+      : [{ key: 'progress', label: verbs.progress, status: STATUS.IN_PROGRESS }]),
     { key: 'done', label: verbs.done, status: STATUS.COMPLETED },
   ]
 }
 
 // Labels for the quick-add / status dropdown attached to every card.
+// Categories with `noProgress` skip the in-progress option.
 export function getStatusOptions(category) {
-  const { verbs } = category
+  const { verbs, noProgress } = category
   return [
     { status: STATUS.WISHLIST, label: `Add to ${verbs.plan}` },
-    { status: STATUS.IN_PROGRESS, label: `Mark as ${verbs.progress}` },
+    ...(noProgress
+      ? []
+      : [{ status: STATUS.IN_PROGRESS, label: `Mark as ${verbs.progress}` }]),
     { status: STATUS.COMPLETED, label: `Mark as ${verbs.done}` },
   ]
 }

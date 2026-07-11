@@ -29,7 +29,7 @@ export default function CategorySearch({ category, query, onOpen }) {
         <EmptyState icon="🫥" title={`No ${category.label} match “${q}”`} hint="Try a different term." />
       )}
       {data && data.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {data.map((item) => (
             <MediaCard key={`${item.category}:${item.externalId}`} item={item} onOpen={onOpen} />
           ))}

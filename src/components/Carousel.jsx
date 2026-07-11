@@ -28,7 +28,7 @@ export default function Carousel({ items, onOpen }) {
         {items.map((item) => (
           <div
             key={`${item.category}:${item.externalId}`}
-            className="w-[150px] shrink-0 snap-start sm:w-[170px]"
+            className="w-[165px] shrink-0 snap-start sm:w-[190px]"
           >
             <MediaCard item={item} onOpen={onOpen} />
           </div>
