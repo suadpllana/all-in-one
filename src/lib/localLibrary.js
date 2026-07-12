@@ -52,7 +52,8 @@ export const localLibrary = {
 
     if (existing) {
       existing.status = status ?? existing.status
-      existing.user_rating = userRating ?? existing.user_rating
+      // undefined = untouched; null = explicitly cleared by the user.
+      if (userRating !== undefined) existing.user_rating = userRating
       existing.title = title ?? existing.title
       existing.poster_url = posterUrl ?? existing.poster_url
       existing.metadata = metadata ?? existing.metadata

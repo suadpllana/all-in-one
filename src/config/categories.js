@@ -27,6 +27,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(229, 9, 20, 0.15)',
     tagline: 'Lights down. Curtain up.',
     source: 'TMDB',
+    ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
     // Movies are watched in one sitting — no in-progress state.
     noProgress: true,
@@ -41,6 +42,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(59, 130, 246, 0.15)',
     tagline: 'Your next binge starts here.',
     source: 'TMDB',
+    ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
   },
   {
@@ -53,6 +55,8 @@ export const CATEGORIES = [
     accentSoft: 'rgba(168, 85, 247, 0.15)',
     tagline: 'From shonen to slice of life.',
     source: 'Jikan / AniList',
+    // Jikan scores come from MyAnimeList.
+    ratingSource: 'MAL',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
   },
   {
@@ -65,6 +69,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(245, 158, 11, 0.15)',
     tagline: 'A quiet shelf of good pages.',
     source: 'Google Books',
+    ratingSource: 'Google Books',
     verbs: { plan: 'Wishlist', progress: 'Reading', done: 'Read' },
   },
   {
@@ -77,6 +82,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(20, 184, 166, 0.15)',
     tagline: 'Press start on something new.',
     source: 'RAWG',
+    ratingSource: 'RAWG',
     verbs: { plan: 'Wishlist', progress: 'Playing', done: 'Played' },
   },
   {
@@ -89,6 +95,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(16, 185, 129, 0.15)',
     tagline: 'True stories, told beautifully.',
     source: 'TMDB',
+    ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
   },
   {
@@ -101,6 +108,7 @@ export const CATEGORIES = [
     accentSoft: 'rgba(249, 115, 22, 0.15)',
     tagline: 'Long-form worth your watch.',
     source: 'YouTube',
+    ratingSource: 'YouTube',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
   },
 ]

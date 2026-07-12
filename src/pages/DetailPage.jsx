@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getApi } from '../api'
-import { CATEGORY_BY_KEY, applyCategoryTheme } from '../config/categories'
+import { CATEGORY_BY_KEY, STATUS, applyCategoryTheme } from '../config/categories'
 import { useLibrary } from '../hooks/useLibrary'
 import { useOpenDetail } from '../hooks/useOpenDetail'
 import StatusDropdown from '../components/StatusDropdown'
+import { StarRatingInput } from '../components/StarRating'
+import { toStars, formatStars } from '../lib/rating'
 import Carousel from '../components/Carousel'
 import { Skeleton, CardRowSkeleton } from '../components/Skeleton'
 import { ErrorState } from '../components/states'
@@ -132,7 +134,10 @@ export default function DetailPage({ categoryKey }) {
                 </div>
                 {entry?.user_rating != null && (
                   <span className="text-sm text-[var(--color-muted)]">
-                    Your rating: <span className="font-bold text-accent">{entry.user_rating}/10</span>
+                    Your rating:{' '}
+                    <span className="font-bold text-amber-400">
+                      {formatStars(toStars(entry.user_rating))} ★
+                    </span>
                   </span>
                 )}
               </div>
@@ -169,9 +174,10 @@ export default function DetailPage({ categoryKey }) {
             </div>
           )}
 
-          <RatingPanel item={d} entry={entry} onRate={(n) => setRating(d, n)} />
-
-          <MoreLikeThis category={category} item={d} />
+          {/* Rating only applies to finished items (Watched/Played/Read). */}
+          {entry?.status === STATUS.COMPLETED && (
+            <RatingPanel entry={entry} onRate={(n) => setRating(d, n)} />
+          )}
         </div>
 
         {/* Facts sidebar */}
@@ -190,6 +196,12 @@ export default function DetailPage({ categoryKey }) {
             </dl>
           </div>
         </aside>
+      </section>
+
+      {/* Full-width, below the two-column body, so the carousel isn't
+          squeezed by the facts sidebar. */}
+      <section className="mt-8">
+        <MoreLikeThis category={category} item={d} />
       </section>
     </div>
   )
@@ -227,24 +239,9 @@ function RatingPanel({ entry, onRate }) {
     <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
       <h3 className="text-sm font-bold">Your rating</h3>
       <p className="mb-3 mt-0.5 text-xs text-[var(--color-muted)]">
-        {entry ? 'Tap a score to rate.' : 'Rating this adds it to your library.'}
+        Tap a star to rate — your rating replaces the public score on your cards.
       </p>
-      <div className="flex flex-wrap gap-1.5">
-        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-          <button
-            key={n}
-            onClick={() => onRate(n)}
-            style={n === entry?.user_rating ? { backgroundColor: 'var(--accent)' } : undefined}
-            className={`h-9 w-9 rounded-lg text-sm font-bold transition-colors ${
-              n === entry?.user_rating
-                ? 'text-white'
-                : 'bg-[var(--color-surface-2)] hover:bg-[var(--color-border)]'
-            }`}
-          >
-            {n}
-          </button>
-        ))}
-      </div>
+      <StarRatingInput value={toStars(entry?.user_rating)} onRate={onRate} className="text-3xl" />
     </div>
   )
 }
@@ -278,9 +275,15 @@ function BackButton({ onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur transition-colors hover:bg-black/60"
+      className="group flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium text-white/90 ring-1 ring-white/10 backdrop-blur transition-all duration-200 hover:-translate-x-0.5 hover:bg-black/70 hover:text-white hover:shadow-lg hover:shadow-black/40 hover:ring-accent active:scale-95"
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="m15 18-6-6 6-6" />
       </svg>
       Back

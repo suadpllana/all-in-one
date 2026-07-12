@@ -32,7 +32,9 @@ export function rowToItem(row) {
     posterUrl: row.poster_url || m.posterUrl || posterFromMeta(m),
     backdropUrl: m.backdropUrl || backdropFromMeta(m) || row.poster_url,
     year: m.year ?? yearFromMeta(m),
-    rating: row.user_rating != null ? row.user_rating : m.rating ?? ratingFromMeta(m),
+    // Public 0-10 score only — the user's own 1-5 star rating travels as
+    // _userRating and replaces this on the card badge when set.
+    rating: m.rating ?? ratingFromMeta(m),
     overview:
       m.overview ||
       m.synopsis ||

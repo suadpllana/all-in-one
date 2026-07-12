@@ -4,6 +4,17 @@ import { libraryStore } from '../lib/libraryStore'
 import { itemToMetadata } from '../lib/rowToItem'
 import { useAuth } from '../context/AuthContext'
 
+// When a row entered its current status (drives the newest-first library
+// order). Old rows may predate some timestamps, hence the fallbacks.
+function statusTime(row) {
+  return (
+    (row.status === 'completed' && row.completed_at) ||
+    row.updated_at ||
+    row.added_at ||
+    ''
+  )
+}
+
 // Central hook for the user's library. Backed by react-query so status changes
 // reflect instantly everywhere (cards, submenu counts, stats).
 export function useLibrary() {
@@ -42,8 +53,14 @@ export function useLibrary() {
     getEntry: (category, externalId) => index.get(`${category}:${externalId}`) || null,
     getStatus: (category, externalId) =>
       index.get(`${category}:${externalId}`)?.status || null,
+    // Newest first: sorted by when the item entered this status, so a
+    // freshly finished movie tops "Watched" even if it sat on the watchlist
+    // for months. (completed_at for done lists — updated_at also bumps on
+    // rating changes, which shouldn't reorder anything.)
     itemsFor: (category, status) =>
-      items.filter((i) => i.category === category && i.status === status),
+      items
+        .filter((i) => i.category === category && i.status === status)
+        .sort((a, b) => statusTime(b).localeCompare(statusTime(a))),
     // item is a normalized API item; status/rating optional
     setStatus: (item, status) =>
       upsert.mutate({

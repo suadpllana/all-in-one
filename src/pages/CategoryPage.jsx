@@ -19,11 +19,11 @@ export default function CategoryPage({ categoryKey }) {
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 400)
 
-  // Reset the in-page search when switching categories (render-time pattern,
-  // avoids a syncing effect).
-  const [lastCat, setLastCat] = useState(categoryKey)
-  if (categoryKey !== lastCat) {
-    setLastCat(categoryKey)
+  // Reset the in-page search when switching categories or tabs (render-time
+  // pattern, avoids a syncing effect).
+  const [lastView, setLastView] = useState(`${categoryKey}/${view || ''}`)
+  if (`${categoryKey}/${view || ''}` !== lastView) {
+    setLastView(`${categoryKey}/${view || ''}`)
     setSearch('')
   }
 
@@ -70,22 +70,25 @@ export default function CategoryPage({ categoryKey }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Submenu category={category} />
         <CategorySearchBox
-          category={category}
+          label={isDiscover ? category.label : tab.label}
           value={search}
           onChange={setSearch}
           onClear={() => setSearch('')}
         />
       </div>
 
-      {searching ? (
-        <CategorySearch category={category} query={debouncedSearch} onOpen={openDetail} />
-      ) : isDiscover ? (
-        <Discover category={category} onOpen={openDetail} />
+      {isDiscover ? (
+        searching ? (
+          <CategorySearch category={category} query={debouncedSearch} onOpen={openDetail} />
+        ) : (
+          <Discover category={category} onOpen={openDetail} />
+        )
       ) : (
         <LibraryView
           category={category}
           status={tab.status}
           statusLabel={tab.label}
+          query={search}
           onOpen={openDetail}
         />
       )}
@@ -93,7 +96,9 @@ export default function CategoryPage({ categoryKey }) {
   )
 }
 
-function CategorySearchBox({ category, value, onChange, onClear }) {
+// On Discover this drives the external API search; on the library tabs it
+// filters the user's saved list for that status (Watchlist, Playing, Read…).
+function CategorySearchBox({ label, value, onChange, onClear }) {
   return (
     <div className="relative shrink-0 sm:w-64">
       <svg
@@ -109,8 +114,8 @@ function CategorySearchBox({ category, value, onChange, onClear }) {
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={`Search ${category.label}…`}
-        aria-label={`Search ${category.label}`}
+        placeholder={`Search ${label}…`}
+        aria-label={`Search ${label}`}
         className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] py-1.5 pl-8 pr-8 text-sm outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-accent"
       />
       {value && (

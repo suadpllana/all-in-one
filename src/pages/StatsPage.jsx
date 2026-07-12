@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CATEGORIES, STATUS } from '../config/categories'
 import { useLibrary } from '../hooks/useLibrary'
+import { toStars } from '../lib/rating'
 
 // Cross-category "My Stats" dashboard.
 export default function StatsPage() {
@@ -66,12 +67,16 @@ export default function StatsPage() {
                     </div>
                     <div className="mt-3 flex gap-4 text-xs text-[var(--color-muted)]">
                       <span>{s.completed} {c.verbs.done.toLowerCase()}</span>
-                      <span>{s.inProgress} {c.verbs.progress.toLowerCase()}</span>
+                      {/* Categories without an in-progress state (movies)
+                          skip the "watching" line. */}
+                      {!c.noProgress && (
+                        <span>{s.inProgress} {c.verbs.progress.toLowerCase()}</span>
+                      )}
                       <span>{s.planned} {c.verbs.plan.toLowerCase()}</span>
                     </div>
                     {s.avgRating != null && (
                       <p className="mt-2 text-xs" style={{ color: c.accent }}>
-                        ★ {s.avgRating.toFixed(1)} avg your rating
+                        ★ {s.avgRating.toFixed(1)}/5 avg your rating
                       </p>
                     )}
                   </Link>
@@ -120,7 +125,8 @@ function computeStats(items) {
       b.planned += 1
     }
     if (it.user_rating != null) {
-      b.ratingSum += it.user_rating
+      // toStars normalizes ratings saved on the old 1-10 scale to 1-5 stars.
+      b.ratingSum += toStars(it.user_rating)
       b.ratingCount += 1
     }
   }

@@ -1,6 +1,9 @@
 import StatusDropdown from './StatusDropdown'
+import { StarRatingInput } from './StarRating'
+import { toStars, formatStars } from '../lib/rating'
 import { cn } from '../lib/cn'
 import { genreLabels } from '../lib/genres'
+import { useLibrary } from '../hooks/useLibrary'
 
 // Poster card used in carousels and grids. Hover reveals the quick-add
 // dropdown and lifts/scales the card.
@@ -11,6 +14,12 @@ import { genreLabels } from '../lib/genres'
 // clicks, which is why quick-add appeared to do nothing).
 export default function MediaCard({ item, onOpen, className }) {
   const genres = genreLabels(item)
+  const { setRating } = useLibrary()
+  // Library rows carry the user's own 1-5 star rating; it replaces the
+  // public score on the poster badge. Completed items ("Watched"/"Played"/
+  // "Read") get an interactive star row in the footer.
+  const myStars = toStars(item._userRating)
+  const canRate = item._status === 'completed'
 
   function open() {
     onOpen(item)
@@ -22,6 +31,8 @@ export default function MediaCard({ item, onOpen, className }) {
       tabIndex={0}
       onClick={open}
       onKeyDown={(e) => {
+        // Ignore keys bubbling from inner controls (stars, quick-add).
+        if (e.target !== e.currentTarget) return
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           open()
@@ -46,8 +57,20 @@ export default function MediaCard({ item, onOpen, className }) {
           </div>
         )}
 
+        {/* Your stars take the top-left spot; the public score moves to the
+            top-right so both stay visible. */}
+        {myStars != null && (
+          <span className="absolute left-1.5 top-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-bold text-amber-400 backdrop-blur">
+            {formatStars(myStars)} ★
+          </span>
+        )}
         {item.rating != null && (
-          <span className="absolute left-1.5 top-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-bold text-white backdrop-blur">
+          <span
+            className={cn(
+              'absolute top-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-bold text-white backdrop-blur',
+              myStars != null ? 'right-1.5' : 'left-1.5',
+            )}
+          >
             ★ {item.rating.toFixed(1)}
           </span>
         )}
@@ -86,7 +109,16 @@ export default function MediaCard({ item, onOpen, className }) {
 
       <div className="p-2">
         <p className="truncate text-sm font-semibold leading-tight">{item.title}</p>
-        <p className="mt-0.5 text-xs text-[var(--color-muted)]">{item.year || '—'}</p>
+        <div className="mt-0.5 flex items-center justify-between gap-2">
+          <p className="text-xs text-[var(--color-muted)]">{item.year || '—'}</p>
+          {canRate && (
+            <StarRatingInput
+              value={myStars}
+              onRate={(n) => setRating(item, n)}
+              className="text-sm"
+            />
+          )}
+        </div>
       </div>
     </div>
   )
