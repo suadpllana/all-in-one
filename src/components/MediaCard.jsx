@@ -3,6 +3,7 @@ import { StarRatingInput } from './StarRating'
 import { toStars, formatStars } from '../lib/rating'
 import { cn } from '../lib/cn'
 import { genreLabels } from '../lib/genres'
+import { durationLabel } from '../lib/duration'
 import { useLibrary } from '../hooks/useLibrary'
 
 // Poster card used in carousels and grids. Hover reveals the quick-add
@@ -14,6 +15,9 @@ import { useLibrary } from '../hooks/useLibrary'
 // clicks, which is why quick-add appeared to do nothing).
 export default function MediaCard({ item, onOpen, className }) {
   const genres = genreLabels(item)
+  // Only present once the item carries runtime/episodes/pages — i.e. saved
+  // rows and detail views. Discover rows omit it rather than guess.
+  const duration = durationLabel(item)
   const { setRating } = useLibrary()
   // Library rows carry the user's own 1-5 star rating; it replaces the
   // public score on the poster badge. Completed items ("Watched"/"Played"/
@@ -110,7 +114,17 @@ export default function MediaCard({ item, onOpen, className }) {
       <div className="p-2">
         <p className="truncate text-sm font-semibold leading-tight">{item.title}</p>
         <div className="mt-0.5 flex items-center justify-between gap-2">
-          <p className="text-xs text-[var(--color-muted)]">{item.year || '—'}</p>
+          <p className="flex min-w-0 items-center gap-1 text-xs text-[var(--color-muted)]">
+            <span>{item.year || '—'}</span>
+            {duration && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="truncate font-medium text-[var(--color-text)]/70">
+                  {duration}
+                </span>
+              </>
+            )}
+          </p>
           {canRate && (
             <StarRatingInput
               value={myStars}

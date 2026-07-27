@@ -8,6 +8,7 @@ import { useOpenDetail } from '../hooks/useOpenDetail'
 import StatusDropdown from '../components/StatusDropdown'
 import { StarRatingInput } from '../components/StarRating'
 import { toStars, formatStars } from '../lib/rating'
+import { formatMinutes } from '../lib/duration'
 import Carousel from '../components/Carousel'
 import { Skeleton, CardRowSkeleton } from '../components/Skeleton'
 import { ErrorState } from '../components/states'
@@ -334,7 +335,7 @@ function DetailSkeleton({ onBack }) {
 function metaChips(d) {
   const out = []
   if (d.year) out.push(String(d.year))
-  if (d.runtime) out.push(`${d.runtime} min`)
+  if (d.runtime) out.push(formatMinutes(d.runtime))
   if (d.seasons) out.push(`${d.seasons} season${d.seasons > 1 ? 's' : ''}`)
   if (d.episodes) out.push(`${d.episodes} episodes`)
   if (d.pageCount) out.push(`${d.pageCount} pages`)
@@ -345,7 +346,8 @@ function metaChips(d) {
 function factRows(d, category) {
   const rows = []
   if (d.year) rows.push(['Year', d.year])
-  if (d.runtime) rows.push([category.key === 'anime' ? 'Ep. length' : 'Runtime', `${d.runtime} min`])
+  if (d.runtime)
+    rows.push([category.key === 'anime' ? 'Ep. length' : 'Runtime', formatMinutes(d.runtime)])
   if (d.seasons) rows.push(['Seasons', d.seasons])
   if (d.episodes) rows.push(['Episodes', d.episodes])
   if (d.pageCount) rows.push(['Pages', d.pageCount])

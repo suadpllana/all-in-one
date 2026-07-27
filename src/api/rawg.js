@@ -39,6 +39,8 @@ function normalize(g) {
           : null,
     overview: g.description_raw || '',
     genreIds: (g.genres || []).map((x) => x.slug),
+    // Average hours to finish — carried on the item so cards can show it.
+    playtime: g.playtime || null,
     raw: g,
   }
 }

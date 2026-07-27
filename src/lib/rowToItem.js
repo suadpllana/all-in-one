@@ -15,6 +15,7 @@ export function itemToMetadata(item) {
     // payload doesn't carry them; stats falls back to per-category defaults).
     runtime: item.runtime ?? raw.runtime ?? raw.episode_run_time?.[0] ?? null,
     episodes: item.episodes ?? raw.episodes ?? raw.number_of_episodes ?? null,
+    seasons: item.seasons ?? raw.seasons ?? raw.number_of_seasons ?? null,
     playtime: item.playtime ?? raw.playtime ?? null,
     pageCount: item.pageCount ?? raw.volumeInfo?.pageCount ?? null,
   }
@@ -44,6 +45,13 @@ export function rowToItem(row) {
       m.snippet?.description ||
       '',
     genreIds: Array.isArray(m.genreIds) ? m.genreIds : genreIdsFromMeta(m),
+    // Surfaced on the item (not just inside raw) so cards can show a duration
+    // badge without re-fetching the detail payload.
+    runtime: m.runtime ?? null,
+    episodes: m.episodes ?? null,
+    seasons: m.seasons ?? null,
+    playtime: m.playtime ?? null,
+    pageCount: m.pageCount ?? null,
     raw: m,
     _userRating: row.user_rating,
     _status: row.status,

@@ -53,6 +53,9 @@ function normalize(m) {
     rating: typeof m.averageScore === 'number' ? m.averageScore / 10 : null,
     overview: strip(m.description),
     genreIds: m.genres || [],
+    // Already in MEDIA_FIELDS — surfaced so cards can show a duration.
+    episodes: m.episodes || null,
+    runtime: m.duration || null,
     raw: m,
   }
 }

@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLibrary } from '../hooks/useLibrary'
 import { useSyncStatus } from '../hooks/useSync'
 import { localLibrary } from '../lib/localLibrary'
 import { createSync, joinSync, disconnectSync, syncNow, getSyncCode } from '../lib/sync'
 import { useQueryClient } from '@tanstack/react-query'
 import { CATEGORIES } from '../config/categories'
+import { downloadBackup, parseBackupFile, restoreBackup } from '../lib/backup'
 
 // Device sync controls: create a code on one device, enter it on another,
 // and the libraries stay merged from then on.
@@ -132,6 +133,122 @@ function SyncSection() {
   )
 }
 
+// Export the whole library to a JSON file, and restore from one. The export is
+// a full snapshot (see lib/backup), so it doubles as the recovery path if the
+// browser's storage is ever cleared.
+function BackupSection() {
+  const qc = useQueryClient()
+  const { items } = useLibrary()
+  const fileRef = useRef(null)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+  const [replaceMode, setReplaceMode] = useState(false)
+
+  // Derived from the live library query so the counts track imports and
+  // status changes without a reload.
+  const rows = CATEGORIES.map((c) => {
+    const total = items.filter((i) => i.category === c.key).length
+    return { key: c.key, label: c.label, total }
+  }).filter((r) => r.total > 0)
+  const total = items.length
+
+  function onExport() {
+    setError(null)
+    try {
+      const backup = downloadBackup()
+      setResult(`Exported ${backup.counts.total} item${backup.counts.total === 1 ? '' : 's'}.`)
+    } catch (err) {
+      setError(err.message || 'Export failed.')
+    }
+  }
+
+  async function onImport(e) {
+    const file = e.target.files?.[0]
+    // Reset immediately so picking the same file twice still fires onChange.
+    e.target.value = ''
+    if (!file) return
+    setError(null)
+    setResult(null)
+    try {
+      const data = await parseBackupFile(file)
+      if (
+        replaceMode &&
+        !confirm(
+          'Replace your entire library with this backup? Anything not in the file will be removed.',
+        )
+      )
+        return
+      const r = restoreBackup(data, { mode: replaceMode ? 'replace' : 'merge' })
+      qc.invalidateQueries({ queryKey: ['library'] })
+      setResult(
+        replaceMode
+          ? `Restored ${r.total} item${r.total === 1 ? '' : 's'}.`
+          : `Imported — ${r.added} added, ${r.updated} updated.` +
+              (r.skipped ? ` ${r.skipped} skipped.` : ''),
+      )
+    } catch (err) {
+      setError(err.message || 'Import failed.')
+    }
+  }
+
+  return (
+    <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <p className="text-sm text-[var(--color-muted)]">
+        Download everything you’ve saved — watched, watchlist, ratings and progress across all
+        categories — as one JSON file. Keep it somewhere safe and you can restore your library
+        even if this browser’s data is cleared.
+      </p>
+
+      {rows.length > 0 && (
+        <ul className="grid gap-x-4 gap-y-1 text-xs text-[var(--color-muted)] sm:grid-cols-2">
+          {rows.map((r) => (
+            <li key={r.key} className="flex justify-between gap-2">
+              <span>{r.label}</span>
+              <span className="font-semibold text-[var(--color-text)]">{r.total}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={onExport}
+          disabled={total === 0}
+          className="rounded-lg bg-[var(--color-accent,#10b981)] px-3 py-1.5 text-sm font-bold text-black hover:opacity-90 disabled:opacity-50"
+        >
+          Export all ({total})
+        </button>
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm font-semibold hover:bg-[var(--color-surface-2)]"
+        >
+          Import backup
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={onImport}
+          className="hidden"
+        />
+      </div>
+
+      <label className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+        <input
+          type="checkbox"
+          checked={replaceMode}
+          onChange={(e) => setReplaceMode(e.target.checked)}
+          className="accent-[var(--color-accent,#10b981)]"
+        />
+        Replace my library instead of merging into it
+      </label>
+
+      {result && <p className="text-sm text-emerald-400">{result}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
+    </div>
+  )
+}
+
 // Account settings + integration/config status.
 export default function AccountPage() {
   const { items } = useLibrary()
@@ -193,6 +310,11 @@ export default function AccountPage() {
           Add missing keys to your <code className="rounded bg-[var(--color-surface-2)] px-1">.env</code>{' '}
           file (see <code className="rounded bg-[var(--color-surface-2)] px-1">.env.example</code>) and restart the dev server.
         </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-bold">Backup &amp; export</h2>
+        <BackupSection />
       </section>
 
       <section className="space-y-3">

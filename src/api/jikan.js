@@ -18,6 +18,10 @@ function normalize(a) {
     rating: typeof a.score === 'number' ? a.score : null,
     overview: a.synopsis || '',
     genreIds: (a.genres || []).map((g) => g.name),
+    // Carried on the item (not just raw) so cards can show a duration without
+    // opening the detail page. Jikan's duration is prose ("24 min per ep").
+    episodes: a.episodes || null,
+    runtime: a.duration ? parseInt(a.duration, 10) || null : null,
     raw: a,
   }
 }
