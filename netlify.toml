@@ -5,6 +5,12 @@
   command = "npm run build"
   publish = "dist"
 
+# Pinned: vite 8 and eslint 10 need node ^20.19 || ^22.13 || >=24. Netlify's
+# default varies by site age, so an unpinned build can land on an older node
+# and fail on engines.
+[build.environment]
+  NODE_VERSION = "22"
+
 [functions]
   directory = "netlify/functions"
 
