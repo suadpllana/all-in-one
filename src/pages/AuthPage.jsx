@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { Button } from '../components/ui/Button'
 
-// Sign in / sign up. Only reachable when Supabase is configured; in local mode
-// we redirect away since there is no account to create.
+// Sign in / sign up. Only reachable when an auth backend is configured; in
+// local mode (the default) there is no account, so redirect home.
 export default function AuthPage() {
   const { signIn, signUp, mode, user } = useAuth()
   const navigate = useNavigate()
@@ -12,64 +13,35 @@ export default function AuthPage() {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
 
-  if (mode === 'local') return <Navigate to="/movies" replace />
+  if (mode === 'local') return <Navigate to="/" replace />
   if (user) return <Navigate to="/stats" replace />
 
   async function onSubmit(e) {
     e.preventDefault()
     setBusy(true)
     setError(null)
-    const { error } = isSignUp
-      ? await signUp(form.email, form.password, form.name)
-      : await signIn(form.email, form.password)
+    const { error } = isSignUp ? await signUp(form.email, form.password, form.name) : await signIn(form.email, form.password)
     setBusy(false)
     if (error) setError(error.message)
     else navigate('/stats')
   }
 
   return (
-    <div className="mx-auto max-w-sm py-10">
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-        <h1 className="text-xl font-black">{isSignUp ? 'Create your Vault' : 'Welcome back'}</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">
-          {isSignUp ? 'Sign up to sync your library across devices.' : 'Sign in to your account.'}
-        </p>
-
+    <div className="mx-auto max-w-sm px-4 py-16">
+      <div className="rounded-3xl bg-surface p-6 ring-1 ring-line">
+        <h1 className="text-2xl font-extrabold text-fg">{isSignUp ? 'Create your Vault' : 'Welcome back'}</h1>
+        <p className="mt-1 text-sm text-muted">{isSignUp ? 'Sign up to sync your library across devices.' : 'Sign in to your account.'}</p>
         <form onSubmit={onSubmit} className="mt-5 space-y-3">
-          {isSignUp && (
-            <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
-          )}
-          <Field
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(v) => setForm({ ...form, email: v })}
-            required
-          />
-          <Field
-            label="Password"
-            type="password"
-            value={form.password}
-            onChange={(v) => setForm({ ...form, password: v })}
-            required
-          />
-
+          {isSignUp && <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />}
+          <Field label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
+          <Field label="Password" type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} required />
           {error && <p className="text-sm text-red-400">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white disabled:opacity-60"
-          >
+          <Button type="submit" variant="primary" disabled={busy} className="w-full">
             {busy ? 'Please wait…' : isSignUp ? 'Sign up' : 'Sign in'}
-          </button>
+          </Button>
         </form>
-
-        <button
-          onClick={() => setIsSignUp((v) => !v)}
-          className="mt-4 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]"
-        >
-          {isSignUp ? 'Already have an account? Sign in' : "New here? Create an account"}
+        <button type="button" onClick={() => setIsSignUp((v) => !v)} className="mt-4 text-sm text-muted hover:text-fg">
+          {isSignUp ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </button>
       </div>
     </div>
@@ -79,13 +51,13 @@ export default function AuthPage() {
 function Field({ label, type = 'text', value, onChange, required }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-[var(--color-muted)]">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
       <input
         type={type}
         value={value}
         required={required}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-accent"
+        className="h-10 w-full rounded-ui bg-surface-2 px-3 text-sm text-fg outline-none ring-1 ring-line focus:ring-2 focus:ring-accent"
       />
     </label>
   )

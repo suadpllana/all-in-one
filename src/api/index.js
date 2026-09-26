@@ -1,20 +1,24 @@
 import { tmdb } from './tmdb'
-import { jikan } from './jikan'
+import { anime } from './anime'
 import { googleBooks } from './googleBooks'
 import { rawg } from './rawg'
 import { youtube } from './youtube'
 
 // Maps a category key to its normalized adapter. Every adapter exposes the
-// same interface: trending, topRated, newReleases, search, byGenres, detail —
-// each returning items in the app's common shape (see any normalize()).
+// same core interface — trending, topRated, newReleases, search, byGenres,
+// detail — returning items in the app's common shape, plus world-specific
+// extras (tmdb.movie.upcoming, tmdb.tv.season, anime.schedule,
+// googleBooks.subject, rawg.upcoming, youtube.creators…).
+// Listed in navigation order — search results and the command palette
+// follow it.
 const ADAPTERS = {
   movie: tmdb.movie,
   tv: tmdb.tv,
-  documentary: tmdb.documentary,
-  anime: jikan,
+  anime,
   book: googleBooks,
   game: rawg,
-  youtube: youtube,
+  documentary: tmdb.documentary,
+  youtube,
 }
 
 export function getApi(categoryKey) {

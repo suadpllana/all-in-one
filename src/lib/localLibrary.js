@@ -2,6 +2,13 @@
 // The optional device-sync layer (lib/sync.js) mirrors it across devices, so
 // deletions are recorded as tombstones instead of vanishing: a device that
 // merges later needs to know the item was removed, not just missing.
+//
+// Row shape:
+//   { id, category, external_id, title, poster_url, metadata, status,
+//     user_rating, progress, favorite, review,
+//     added_at, updated_at, started_at, completed_at }
+// Sync merges whole rows (newest updated_at wins), so new optional fields
+// travel between devices without any schema change.
 
 const KEY = 'vault:library'
 const TOMBSTONE_KEY = 'vault:library:tombstones'
@@ -38,12 +45,39 @@ function rowId(category, externalId) {
   return `${category}:${externalId}`
 }
 
+// Merge fresh metadata over the cached copy without letting a sparse payload
+// (a list item) blank out richer fields saved earlier from a detail page.
+function mergeMetadata(prev, next) {
+  if (!next) return prev ?? null
+  if (!prev) return next
+  const out = { ...prev }
+  for (const [k, v] of Object.entries(next)) {
+    const empty = v == null || (Array.isArray(v) && v.length === 0) || v === ''
+    if (!empty) out[k] = v
+  }
+  return out
+}
+
 export const localLibrary = {
   list() {
     return read()
   },
 
-  upsert({ category, externalId, title, posterUrl, metadata, status, userRating }) {
+  // Create or patch a row. Every field except category/externalId is
+  // optional; `undefined` leaves a field untouched, `null` clears it.
+  upsert({
+    category,
+    externalId,
+    title,
+    posterUrl,
+    metadata,
+    status,
+    userRating,
+    progress,
+    favorite,
+    review,
+    completedAt,
+  }) {
     const items = read()
     const tombstones = readTombstones()
     const id = rowId(category, externalId)
@@ -51,16 +85,21 @@ export const localLibrary = {
     const existing = items.find((i) => i.id === id)
 
     if (existing) {
-      existing.status = status ?? existing.status
-      // undefined = untouched; null = explicitly cleared by the user.
+      const prevStatus = existing.status
+      if (status) existing.status = status
       if (userRating !== undefined) existing.user_rating = userRating
+      if (progress !== undefined) existing.progress = progress
+      if (favorite !== undefined) existing.favorite = favorite
+      if (review !== undefined) existing.review = review
       existing.title = title ?? existing.title
       existing.poster_url = posterUrl ?? existing.poster_url
-      existing.metadata = metadata ?? existing.metadata
+      existing.metadata = mergeMetadata(existing.metadata, metadata)
       existing.updated_at = now
-      if (status === 'completed' && !existing.completed_at) {
-        existing.completed_at = now
-      }
+      // Entering a status stamps when it happened (drives diaries and
+      // "started reading" dates). Re-completing moves the diary entry.
+      if (status === 'completed' && prevStatus !== 'completed') existing.completed_at = now
+      if (status === 'in_progress' && !existing.started_at) existing.started_at = now
+      if (completedAt !== undefined) existing.completed_at = completedAt
     } else {
       items.push({
         id,
@@ -71,12 +110,27 @@ export const localLibrary = {
         metadata: metadata ?? null,
         status,
         user_rating: userRating ?? null,
+        progress: progress ?? null,
+        favorite: favorite ?? false,
+        review: review ?? null,
         added_at: now,
         updated_at: now,
-        completed_at: status === 'completed' ? now : null,
+        started_at: status === 'in_progress' ? now : null,
+        completed_at: status === 'completed' ? (completedAt ?? now) : null,
       })
     }
     delete tombstones[id]
+    write(items, tombstones)
+    return read()
+  },
+
+  // Put a full row back exactly as it was (undo). updated_at is bumped so the
+  // restored state is the newest edit everywhere after sync.
+  put(row) {
+    const items = read().filter((i) => i.id !== row.id)
+    const tombstones = readTombstones()
+    items.push({ ...row, updated_at: new Date().toISOString() })
+    delete tombstones[row.id]
     write(items, tombstones)
     return read()
   },

@@ -11,11 +11,20 @@
     "deploy": "npx -y netlify-cli deploy --prod --build"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/literata": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/bebas-neue": "^5.3.0",
+    "@fontsource/chakra-petch": "^5.3.0",
+    "@fontsource/m-plus-rounded-1c": "^5.3.0",
     "@netlify/blobs": "^10.7.9",
     "@tanstack/react-query": "^5.101.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "^7.18.1",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

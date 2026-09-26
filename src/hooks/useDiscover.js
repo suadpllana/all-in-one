@@ -4,11 +4,12 @@ import { useLibrary } from './useLibrary'
 
 const HOUR = 60 * 60 * 1000
 
-// One discovery shelf (trending | topRated | newReleases) for a category.
-export function useSection(categoryKey, section, enabled = true) {
+// One discovery shelf (trending | topRated | newReleases | upcoming …) for a
+// category. `args` are extra arguments for the adapter call (after signal).
+export function useSection(categoryKey, section, { enabled = true, args = [] } = {}) {
   return useQuery({
-    queryKey: ['discover', categoryKey, section],
-    queryFn: ({ signal }) => getApi(categoryKey)[section](signal),
+    queryKey: ['discover', categoryKey, section, ...args],
+    queryFn: ({ signal }) => getApi(categoryKey)[section](signal, ...args),
     enabled,
     staleTime: HOUR,
     gcTime: 6 * HOUR,
@@ -16,13 +17,35 @@ export function useSection(categoryKey, section, enabled = true) {
   })
 }
 
-// Content-based "Recommended for you": collect the most common genres from the
-// user's items in this category, then query the API for more of the same.
+// Arbitrary world-specific query with the same caching policy.
+export function useWorldQuery(key, fn, { enabled = true, staleTime = HOUR } = {}) {
+  return useQuery({
+    queryKey: ['world', ...key],
+    queryFn: ({ signal }) => fn(signal),
+    enabled,
+    staleTime,
+    gcTime: 6 * HOUR,
+    retry: 1,
+  })
+}
+
+export function useDetail(categoryKey, id) {
+  return useQuery({
+    queryKey: ['detail', categoryKey, id],
+    queryFn: ({ signal }) => getApi(categoryKey).detail(id, signal),
+    staleTime: 30 * 60 * 1000,
+    enabled: Boolean(id),
+  })
+}
+
+// Content-based "Recommended for you": the most common genres across your
+// items in this world, then ask the API for more of the same (minus what
+// you already have).
 export function useRecommended(categoryKey) {
   const { items } = useLibrary()
   const mine = items.filter((i) => i.category === categoryKey)
-
   const genres = topGenres(mine)
+  const owned = new Set(mine.map((i) => String(i.external_id)))
 
   return useQuery({
     queryKey: ['recommended', categoryKey, genres],
@@ -30,19 +53,19 @@ export function useRecommended(categoryKey) {
     enabled: genres.length > 0,
     staleTime: HOUR,
     retry: 1,
+    select: (data) => (data || []).filter((i) => !owned.has(String(i.externalId))),
   })
 }
 
 function topGenres(rows) {
   const counts = new Map()
   for (const row of rows) {
-    const ids =
-      row.metadata?.genreIds || row.metadata?.genre_ids || genreNames(row.metadata)
+    const ids = row.metadata?.genreIds || row.metadata?.genre_ids || genreNames(row.metadata)
     for (const g of ids || []) counts.set(g, (counts.get(g) || 0) + 1)
   }
   return [...counts.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
+    .slice(0, 2)
     .map(([g]) => g)
 }
 
