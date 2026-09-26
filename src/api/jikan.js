@@ -1,91 +1,84 @@
 import { fetchJson } from './http'
-import { anilist } from './anilist'
 
-// Jikan v4 — unofficial MyAnimeList API, no key required. Rate limited
-// (~3 req/s, 60/min) so react-query caching + AniList fallback matter.
+// Jikan v4 — unofficial MyAnimeList API, no key. Fallback source for anime
+// when AniList is unreachable. Rate limited (~3 req/s), so requests are
+// spaced out through a tiny queue.
 const BASE = 'https://api.jikan.moe/v4'
+
+let last = 0
+function queued(url, signal) {
+  const wait = Math.max(0, last + 400 - Date.now())
+  last = Date.now() + wait
+  return new Promise((resolve) => setTimeout(resolve, wait)).then(() => fetchJson(url, { signal }))
+}
+
+const FORMAT = { TV: 'TV', Movie: 'MOVIE', OVA: 'OVA', ONA: 'ONA', Special: 'SPECIAL', Music: 'MUSIC' }
 
 function normalize(a) {
   return {
     category: 'anime',
     externalId: String(a.mal_id),
+    malId: a.mal_id,
     title: a.title_english || a.title || 'Untitled',
-    posterUrl: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || null,
-    // Jikan only has tall 2:3 posters — no wide banner art. Leave the backdrop
-    // null so the Hero uses its poster treatment instead of zoom-cropping.
+    titleRomaji: a.title || null,
+    titleNative: a.title_japanese || null,
+    posterUrl: a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || null,
+    // MAL has no wide banner art.
     backdropUrl: null,
     year: a.year || (a.aired?.prop?.from?.year ?? null),
     rating: typeof a.score === 'number' ? a.score : null,
-    overview: a.synopsis || '',
+    popularity: a.members ?? null,
+    overview: (a.synopsis || '').replace(/\[Written by MAL Rewrite\]\s*$/, '').trim(),
     genreIds: (a.genres || []).map((g) => g.name),
-    // Carried on the item (not just raw) so cards can show a duration without
-    // opening the detail page. Jikan's duration is prose ("24 min per ep").
     episodes: a.episodes || null,
     runtime: a.duration ? parseInt(a.duration, 10) || null : null,
-    raw: a,
+    format: FORMAT[a.type] || a.type || null,
+    airingStatus: a.airing ? 'RELEASING' : a.status === 'Not yet aired' ? 'NOT_YET_RELEASED' : 'FINISHED',
+    season: a.season ? a.season.toUpperCase() : null,
+    studios: (a.studios || []).map((s) => s.name),
+    nextAiring: null,
+    raw: { genres: (a.genres || []).map((g) => g.name) },
   }
 }
 
-const mapList = (data) =>
-  (data.data || []).filter((a) => a.images?.jpg?.image_url).map(normalize)
-
-// Each Jikan call falls back to AniList on failure so the anime page still
-// renders when MAL is rate-limited or down.
-async function withFallback(jikanFn, anilistFn) {
-  try {
-    return await jikanFn()
-  } catch (err) {
-    if (err.name === 'AbortError') throw err
-    return anilistFn()
-  }
+const mapList = (data) => {
+  const seen = new Set()
+  return (data.data || [])
+    .filter((a) => a.images?.jpg?.image_url && !seen.has(a.mal_id) && seen.add(a.mal_id))
+    .map(normalize)
 }
 
 export const jikan = {
-  trending: (signal) =>
-    withFallback(
-      () => fetchJson(`${BASE}/top/anime?filter=airing&limit=20`, { signal }).then(mapList),
-      () => anilist.trending(signal),
-    ),
-  topRated: (signal) =>
-    withFallback(
-      () => fetchJson(`${BASE}/top/anime?limit=20`, { signal }).then(mapList),
-      () => anilist.topRated(signal),
-    ),
-  newReleases: (signal) =>
-    withFallback(
-      () => fetchJson(`${BASE}/seasons/now?limit=20`, { signal }).then(mapList),
-      () => anilist.newReleases(signal),
-    ),
+  trending: (signal) => queued(`${BASE}/top/anime?filter=airing&limit=20`, signal).then(mapList),
+  topRated: (signal) => queued(`${BASE}/top/anime?limit=20`, signal).then(mapList),
+  popular: (signal) => queued(`${BASE}/top/anime?filter=bypopularity&limit=20`, signal).then(mapList),
+  newReleases: (signal) => queued(`${BASE}/seasons/now?limit=24`, signal).then(mapList),
+  season: ({ season, year }, signal) =>
+    queued(`${BASE}/seasons/${year}/${season.toLowerCase()}?limit=24`, signal).then(mapList),
   search: (query, signal) =>
-    withFallback(
-      () =>
-        fetchJson(`${BASE}/anime?q=${encodeURIComponent(query)}&limit=20&sfw`, { signal }).then(
-          mapList,
-        ),
-      () => anilist.search(query, signal),
-    ),
-  byGenres: (genres, signal) =>
-    // Jikan genre filtering needs numeric ids; simplest to defer to AniList
-    // which accepts genre names (the shape we cache).
-    anilist.byGenres(genres, signal).catch(() => []),
+    queued(`${BASE}/anime?q=${encodeURIComponent(query)}&limit=20&sfw`, signal).then(mapList),
   async detail(externalId, signal) {
-    // AniList ids are prefixed "al:"; route those straight to AniList.
-    if (String(externalId).startsWith('al:')) return anilist.detail(externalId, signal)
-    try {
-      const { data: a } = await fetchJson(`${BASE}/anime/${externalId}/full`, { signal })
-      const base = normalize(a)
-      return {
-        ...base,
-        genres: (a.genres || []).map((g) => g.name),
-        runtime: a.duration ? parseInt(a.duration, 10) || null : null,
-        episodes: a.episodes || null,
-        people: [],
-        creators: (a.studios || []).map((s) => s.name).slice(0, 3),
-        tagline: (a.title_japanese && `${a.title_japanese}`) || '',
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') throw err
-      return anilist.detail(externalId, signal)
+    const { data: a } = await queued(`${BASE}/anime/${externalId}/full`, signal)
+    const base = normalize(a)
+    return {
+      ...base,
+      genres: (a.genres || []).map((g) => g.name),
+      trailerKey: a.trailer?.youtube_id || null,
+      tags: (a.themes || []).map((t) => t.name),
+      rankings: a.rank ? [{ rank: a.rank, type: 'RATED', label: 'Ranked on MyAnimeList' }] : [],
+      streaming: (a.streaming || []).map((s) => ({ site: s.name, url: s.url })),
+      characters: [],
+      relations: (a.relations || []).flatMap((r) =>
+        (r.entry || []).map((e) => ({
+          relation: r.relation,
+          title: e.name,
+          type: (e.type || '').toUpperCase(),
+          externalId: e.type === 'anime' ? String(e.mal_id) : null,
+        })),
+      ),
+      recommendations: [],
+      creators: base.studios.slice(0, 3),
+      people: [],
     }
   },
 }

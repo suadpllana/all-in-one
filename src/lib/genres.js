@@ -36,9 +36,15 @@ const TMDB_GENRES = {
 // Title-case lowercase slugs ("role-playing-games" -> "Role Playing Games");
 // leave already-formatted names ("Slice of Life", "LEMMiNO") untouched.
 const prettify = (s) =>
-  /^[a-z0-9-]+$/.test(s)
-    ? s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-    : s
+  SLUG_NAMES[s] ||
+  (/^[a-z0-9-]+$/.test(s) ? s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : s)
+
+// RAWG slugs whose title-cased form reads badly.
+const SLUG_NAMES = {
+  'role-playing-games-rpg': 'RPG',
+  'massively-multiplayer': 'MMO',
+  'board-games': 'Board Games',
+}
 
 export function genreLabels(item, max = 3) {
   const seen = new Set()

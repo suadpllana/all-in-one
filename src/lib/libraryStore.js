@@ -14,6 +14,10 @@ export const libraryStore = {
     return localLibrary.upsert(item)
   },
 
+  async put(userId, row) {
+    return localLibrary.put(row)
+  },
+
   async remove(userId, args) {
     return localLibrary.remove(args)
   },

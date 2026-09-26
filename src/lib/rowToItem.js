@@ -1,29 +1,46 @@
 // Slim metadata cache written when an item is saved to the library — only
-// what cards, stats and recommendations need (~0.2 KB vs the full raw API
-// payload, which for games ran ~12 KB). Works for both list items and detail
-// items (detail adds runtime/episodes/playtime/pageCount).
+// what cards, stats, progress tracking and recommendations need (~0.3 KB vs
+// the full raw API payload, which for games ran ~12 KB). Works for list items
+// and detail items (detail adds runtime/episodes/seasons/pageCount…).
 export function itemToMetadata(item) {
   const raw = item.raw || {}
   return {
-    overview: item.overview || '',
+    overview: (item.overview || '').slice(0, 600),
     year: item.year ?? null,
     rating: item.rating ?? null,
     posterUrl: item.posterUrl ?? null,
     backdropUrl: item.backdropUrl ?? null,
     genreIds: item.genreIds || [],
-    // Time-invested inputs for the stats page (null when the source's list
-    // payload doesn't carry them; stats falls back to per-category defaults).
+    // Time-invested + progress totals (null when the source's list payload
+    // doesn't carry them; stats falls back to per-category defaults).
     runtime: item.runtime ?? raw.runtime ?? raw.episode_run_time?.[0] ?? null,
     episodes: item.episodes ?? raw.episodes ?? raw.number_of_episodes ?? null,
     seasons: item.seasons ?? raw.seasons ?? raw.number_of_seasons ?? null,
+    seasonEpisodes: item.seasonEpisodes ?? null,
     playtime: item.playtime ?? raw.playtime ?? null,
     pageCount: item.pageCount ?? raw.volumeInfo?.pageCount ?? null,
+    // World-specific card details.
+    authors: item.authors?.length ? item.authors.slice(0, 3) : null,
+    platforms: item.platforms?.length ? item.platforms : null,
+    metacritic: item.metacritic ?? null,
+    channelTitle: item.channelTitle ?? null,
+    channelId: item.channelId ?? null,
+    channelAvatar: item.channelAvatar ?? null,
+    publishedAt: item.publishedAt ?? null,
+    views: item.views ?? null,
+    durationLabel: item.durationLabel ?? null,
+    format: item.format ?? null,
+    network: item.network ?? null,
+    inProduction: item.inProduction ?? null,
+    releaseDate: item.releaseDate ?? null,
+    color: item.color ?? null,
   }
 }
 
 // Convert a stored library row back into the normalized "item" shape the cards
-// and detail modal expect. Prefers the slim metadata shape above; the *FromMeta
-// helpers keep rows saved before it existed (full raw payloads) rendering.
+// and detail pages expect. Prefers the slim metadata shape above; the
+// *FromMeta helpers keep rows saved before it existed (full raw payloads)
+// rendering.
 export function rowToItem(row) {
   const m = row.metadata || {}
   return {
@@ -31,10 +48,10 @@ export function rowToItem(row) {
     externalId: row.external_id,
     title: row.title,
     posterUrl: row.poster_url || m.posterUrl || posterFromMeta(m),
-    backdropUrl: m.backdropUrl || backdropFromMeta(m) || row.poster_url,
+    backdropUrl: m.backdropUrl || backdropFromMeta(m) || null,
     year: m.year ?? yearFromMeta(m),
     // Public 0-10 score only — the user's own 1-5 star rating travels as
-    // _userRating and replaces this on the card badge when set.
+    // _userRating.
     rating: m.rating ?? ratingFromMeta(m),
     overview:
       m.overview ||
@@ -45,16 +62,36 @@ export function rowToItem(row) {
       m.snippet?.description ||
       '',
     genreIds: Array.isArray(m.genreIds) ? m.genreIds : genreIdsFromMeta(m),
-    // Surfaced on the item (not just inside raw) so cards can show a duration
-    // badge without re-fetching the detail payload.
     runtime: m.runtime ?? null,
     episodes: m.episodes ?? null,
     seasons: m.seasons ?? null,
+    seasonEpisodes: m.seasonEpisodes ?? null,
     playtime: m.playtime ?? null,
     pageCount: m.pageCount ?? null,
+    authors: m.authors ?? m.volumeInfo?.authors ?? [],
+    platforms: m.platforms ?? [],
+    metacritic: m.metacritic ?? null,
+    channelTitle: m.channelTitle ?? m.snippet?.channelTitle ?? null,
+    channelId: m.channelId ?? m.snippet?.channelId ?? null,
+    channelAvatar: m.channelAvatar ?? null,
+    publishedAt: m.publishedAt ?? m.snippet?.publishedAt ?? null,
+    views: m.views ?? null,
+    durationLabel: m.durationLabel ?? null,
+    format: m.format ?? null,
+    network: m.network ?? null,
+    inProduction: m.inProduction ?? null,
+    releaseDate: m.releaseDate ?? null,
+    color: m.color ?? null,
     raw: m,
     _userRating: row.user_rating,
     _status: row.status,
+    _progress: row.progress ?? null,
+    _favorite: Boolean(row.favorite),
+    _review: row.review ?? null,
+    _addedAt: row.added_at,
+    _updatedAt: row.updated_at,
+    _startedAt: row.started_at ?? null,
+    _completedAt: row.completed_at ?? null,
   }
 }
 

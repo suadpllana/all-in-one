@@ -1,102 +1,401 @@
 @import 'tailwindcss';
 
-/* ------------------------------------------------------------------ *
- * Vault — design tokens
- * Dark-mode-first. Every category gets its own visual identity:
- * CategoryPage/DetailPage set --accent, --accent-2 and
- * <html data-category="..."> — the rules below turn that into a unique
- * ambient background, signature pattern and title typography per category.
- * ------------------------------------------------------------------ */
+/* ======================================================================== *
+ * Vault — design system
+ *
+ * Every category is its own "world". A theme is a set of CSS custom
+ * properties applied with data-theme="<key>" — on <html> for the current
+ * page (see lib/theme.js) or on any element to scope a subtree (the Home
+ * page renders each category portal in its own theme).
+ *
+ * Components only ever use the semantic tokens below (bg-bg, text-fg,
+ * border-line, font-display…), so switching data-theme restyles the entire
+ * app: palette, typography, radii, textures and even light/dark.
+ * ======================================================================== */
 
-@theme {
-  --color-bg: #0a0a0f;
-  --color-surface: #14141c;
-  --color-surface-2: #1c1c28;
-  --color-border: #2a2a38;
-  --color-text: #f4f4f6;
-  --color-muted: #9a9aae;
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --color-gold: #f5b83d;
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-display: var(--display-font);
+  --font-read: var(--read-font);
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  --radius-card: 0.75rem;
+  --radius-card: var(--r-card);
+  --radius-ui: var(--r-ui);
 
-  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
 }
+
+/* ---------------------------------------------------------------- themes */
+
+/* Each world = a "voice" (accent pair, display face, card radius) plus a
+   "surface" palette. data-theme applies both; data-accent applies only the
+   voice, so a book card on the dark Home page keeps its serif + terracotta
+   without flipping to the light paper palette. */
+
+:root,
+[data-theme='home'] {
+  --bg: #09090e;
+  --bg-elev: #0f0f16;
+  --surface: #14141d;
+  --surface-2: #1c1c28;
+  --line: #262636;
+  --fg: #f5f5f8;
+  --fg-2: #cfcfdc;
+  --muted: #8b8ba4;
+  --accent: #8b7bff;
+  --accent-2: #3dd6f5;
+  --on-accent: #ffffff;
+  --display-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --display-weight: 800;
+  --display-tracking: -0.035em;
+  --display-case: none;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-card: 14px;
+  --r-ui: 12px;
+  color-scheme: dark;
+}
+
+/* Movies — velvet-black auditorium, brass & crimson, marquee type. */
+[data-theme='movie'],
+[data-accent='movie'] {
+  --accent: #e5383b;
+  --accent-2: #f2c14e;
+  --on-accent: #ffffff;
+  --display-font: 'Bebas Neue', 'Oswald', Impact, sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.015em;
+  --display-case: uppercase;
+  --r-card: 6px;
+}
+[data-theme='movie'] {
+  --bg: #0a0808;
+  --bg-elev: #110d0d;
+  --surface: #171212;
+  --surface-2: #211a1a;
+  --line: #2f2525;
+  --fg: #f7f1e8;
+  --fg-2: #dccfc2;
+  --muted: #a08f84;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-ui: 8px;
+  color-scheme: dark;
+}
+
+/* TV — midnight broadcast blue, electric cyan, geometric grotesk. */
+[data-theme='tv'],
+[data-accent='tv'] {
+  --accent: #3b82f6;
+  --accent-2: #22d3ee;
+  --on-accent: #ffffff;
+  --display-font: 'Space Grotesk Variable', 'Inter Variable', sans-serif;
+  --display-weight: 700;
+  --display-tracking: -0.03em;
+  --display-case: none;
+  --r-card: 14px;
+}
+[data-theme='tv'] {
+  --bg: #060a13;
+  --bg-elev: #0a1120;
+  --surface: #0e1627;
+  --surface-2: #152037;
+  --line: #1e2c47;
+  --fg: #eef4ff;
+  --fg-2: #c7d5ef;
+  --muted: #8397bb;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-ui: 12px;
+  color-scheme: dark;
+}
+
+/* Anime — deep indigo night, sakura pink & lavender, rounded type. */
+[data-theme='anime'],
+[data-accent='anime'] {
+  --accent: #ff5c9d;
+  --accent-2: #8f7cff;
+  --on-accent: #ffffff;
+  --display-font: 'M PLUS Rounded 1c', 'Inter Variable', sans-serif;
+  --display-weight: 800;
+  --display-tracking: -0.02em;
+  --display-case: none;
+  --r-card: 16px;
+}
+[data-theme='anime'] {
+  --bg: #0d0a1a;
+  --bg-elev: #120e24;
+  --surface: #17122c;
+  --surface-2: #211a3d;
+  --line: #2f2656;
+  --fg: #f7f4ff;
+  --fg-2: #d8d0f5;
+  --muted: #9d93c9;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-ui: 999px;
+  color-scheme: dark;
+}
+
+/* Books — a warm reading room: paper, ink, terracotta and ochre. Light. */
+[data-theme='book'],
+[data-accent='book'] {
+  --accent: #a3432a;
+  --accent-2: #c68b2c;
+  --on-accent: #fff8ef;
+  --display-font: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --display-weight: 600;
+  --display-tracking: -0.02em;
+  --display-case: none;
+  --r-card: 3px;
+}
+[data-accent='book'] {
+  /* terracotta is too dark on dark surfaces; lift it for accent-only use */
+  --accent: #e0774f;
+}
+[data-theme='book'] {
+  --bg: #f3ece0;
+  --bg-elev: #f8f2e8;
+  --surface: #fffaf2;
+  --surface-2: #efe5d4;
+  --line: #e0d3bd;
+  --fg: #2a1e14;
+  --fg-2: #4b3a2b;
+  --muted: #86725e;
+  --read-font: 'Literata Variable', Georgia, serif;
+  --r-ui: 10px;
+  color-scheme: light;
+}
+
+/* Games — HUD: carbon black, acid lime & teal, angular techno type. */
+[data-theme='game'],
+[data-accent='game'] {
+  --accent: #b6f23a;
+  --accent-2: #25e0c1;
+  --on-accent: #081006;
+  --display-font: 'Chakra Petch', 'Inter Variable', sans-serif;
+  --display-weight: 700;
+  --display-tracking: 0.01em;
+  --display-case: uppercase;
+  --r-card: 4px;
+}
+[data-theme='game'] {
+  --bg: #06080b;
+  --bg-elev: #0a0d12;
+  --surface: #0e1318;
+  --surface-2: #151c24;
+  --line: #1f2a35;
+  --fg: #e7f2f6;
+  --fg-2: #c3d3db;
+  --muted: #7c909f;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-ui: 4px;
+  color-scheme: dark;
+}
+
+/* Documentaries — field journal / editorial: olive dark, bone, ochre, serif. */
+[data-theme='documentary'],
+[data-accent='documentary'] {
+  --accent: #e2a93b;
+  --accent-2: #8cc084;
+  --on-accent: #16140c;
+  --display-font: 'Newsreader Variable', Georgia, serif;
+  --display-weight: 460;
+  --display-tracking: -0.02em;
+  --display-case: none;
+  --r-card: 2px;
+}
+[data-theme='documentary'] {
+  --bg: #0c0e0b;
+  --bg-elev: #111410;
+  --surface: #161a14;
+  --surface-2: #1e231b;
+  --line: #2c3227;
+  --fg: #f2efe4;
+  --fg-2: #d6d2c2;
+  --muted: #9b9a86;
+  --read-font: 'Newsreader Variable', Georgia, serif;
+  --r-ui: 6px;
+  color-scheme: dark;
+}
+
+/* YouTube — video platform: neutral graphite, signal red. */
+[data-theme='youtube'],
+[data-accent='youtube'] {
+  --accent: #ff3b3b;
+  --accent-2: #ff8a3d;
+  --on-accent: #ffffff;
+  --display-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --display-weight: 750;
+  --display-tracking: -0.03em;
+  --display-case: none;
+  --r-card: 12px;
+}
+[data-theme='youtube'] {
+  --bg: #0f0f0f;
+  --bg-elev: #141414;
+  --surface: #1a1a1a;
+  --surface-2: #242424;
+  --line: #303030;
+  --fg: #f1f1f1;
+  --fg-2: #d0d0d0;
+  --muted: #a3a3a3;
+  --read-font: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --r-ui: 999px;
+  color-scheme: dark;
+}
+
+/* Derived tokens are re-declared wherever a theme applies so scoped themes
+   (data-theme on a nested element) recompute them from their own palette. */
+:root,
+[data-theme],
+[data-accent] {
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent) 45%, transparent);
+  --accent-grad: linear-gradient(105deg, var(--accent), var(--accent-2));
+  --glass: color-mix(in srgb, var(--bg) 55%, transparent);
+  --scrim: var(--bg);
+}
+
+/* ------------------------------------------------------------------ base */
 
 @keyframes shimmer {
   0% {
-    background-position: -400px 0;
+    background-position: -600px 0;
   }
   100% {
-    background-position: 400px 0;
+    background-position: 600px 0;
   }
-}
-
-:root {
-  /* default accents (overridden per-category via applyCategoryTheme) */
-  --accent: #e50914;
-  --accent-2: #f5c518;
-  --accent-soft: rgba(229, 9, 20, 0.15);
-  color-scheme: dark;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
+html {
+  background: var(--bg);
+  transition: background-color 0.35s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The canvas colour comes from <html>; body stays transparent so the fixed
+   .ambient layer (z-index -1) isn't painted over by body's own background. */
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: transparent;
+  color: var(--fg);
   font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: color 0.35s ease;
 }
 
-/* Tailwind v4 preflight sets buttons to cursor: default — restore the
-   pointer for everything clickable. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--fg);
+}
+
+/* Tailwind v4 preflight sets buttons to cursor: default. */
 button:not(:disabled),
-[role='button'] {
+[role='button'],
+summary {
   cursor: pointer;
 }
 
-/* Accent helpers used throughout the app */
-.text-accent {
-  color: var(--accent);
-}
-.bg-accent {
-  background-color: var(--accent);
-}
-.bg-accent-soft {
-  background-color: var(--accent-soft);
-}
-.border-accent {
-  border-color: var(--accent);
-}
-.ring-accent {
-  --tw-ring-color: var(--accent);
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* Two-tone accent gradient helpers */
-.bg-gradient-accent {
-  background-image: linear-gradient(100deg, var(--accent), var(--accent-2));
+img {
+  -webkit-user-drag: none;
 }
-.text-gradient-accent {
-  background-image: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 90%);
+
+/* ------------------------------------------------------------ typography */
+
+/* The display face carries each category's voice: marquee caps for movies,
+   bookish serif for books, techno caps for games, editorial serif for docs. */
+.font-display,
+.display {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  text-transform: var(--display-case);
+}
+
+.display {
+  line-height: 0.95;
+}
+[data-theme='book'] .display,
+[data-theme='documentary'] .display,
+[data-accent='book'] .display,
+[data-accent='documentary'] .display {
+  line-height: 1.02;
+}
+
+.kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.font-read {
+  font-family: var(--read-font);
+}
+
+.text-gradient {
+  background-image: var(--accent-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Smooth accent transition when switching categories */
-* {
-  transition-property: background-color, border-color, color;
-  transition-duration: 200ms;
+.outline-num {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  color: transparent;
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--fg) 55%, transparent);
+  line-height: 0.8;
 }
 
-/* Hide scrollbars on horizontal carousels but keep scrolling */
+/* ---------------------------------------------------------------- layout */
+
+/* In the components layer so utilities can refine it (e.g. `shell max-w-3xl`). */
+@layer components {
+  .shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 1480px;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .shell {
+      padding-inline: 3rem;
+    }
+  }
+}
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -105,167 +404,33 @@ button:not(:disabled),
   display: none;
 }
 
-/* Skeleton shimmer */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--color-surface) 25%,
-    var(--color-surface-2) 50%,
-    var(--color-surface) 75%
-  );
-  background-size: 800px 100%;
-  animation: var(--animate-shimmer);
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
-/* ------------------------------------------------------------------ *
- * Ambient background — a fixed layer behind everything. The base layer
- * paints soft glows from the current accent pair; ::before carries each
- * category's signature pattern (spotlights, scanlines, grids, ...).
- * ------------------------------------------------------------------ */
-
-.app-ambient {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      900px 480px at 10% -8%,
-      color-mix(in srgb, var(--accent) 15%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      1000px 560px at 105% 12%,
-      color-mix(in srgb, var(--accent-2) 9%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      800px 500px at 50% 115%,
-      color-mix(in srgb, var(--accent) 7%, transparent),
-      transparent 70%
-    );
+/* Soft right edge for a scroller that stops inside a column (Rail inset). */
+@utility fade-r {
+  mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
 }
 
-.app-ambient::before {
-  content: '';
-  position: absolute;
-  inset: 0;
+/* Glass bars (top bar / category bar) */
+.glass {
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(18px);
+  backdrop-filter: saturate(1.4) blur(18px);
 }
 
-/* Movies — projector beams sweeping down from the top corners. */
-:root[data-category='movie'] .app-ambient::before {
-  background:
-    conic-gradient(
-      from 155deg at 12% -12%,
-      transparent 42%,
-      rgba(245, 197, 24, 0.055) 47%,
-      transparent 52%
-    ),
-    conic-gradient(
-      from 205deg at 88% -12%,
-      transparent 48%,
-      rgba(229, 9, 20, 0.06) 53%,
-      transparent 58%
-    );
+.bg-accent-grad {
+  background-image: var(--accent-grad);
 }
 
-/* TV — faint broadcast scanlines. */
-:root[data-category='tv'] .app-ambient::before {
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(148, 197, 255, 0.022) 0 1px,
-    transparent 1px 5px
-  );
-}
-
-/* Anime — drifting sakura-petal dots in purple/pink. */
-:root[data-category='anime'] .app-ambient::before {
-  background:
-    radial-gradient(circle 3px at 12% 24%, rgba(236, 72, 153, 0.3), transparent 100%),
-    radial-gradient(circle 2px at 28% 62%, rgba(168, 85, 247, 0.28), transparent 100%),
-    radial-gradient(circle 4px at 45% 18%, rgba(236, 72, 153, 0.16), transparent 100%),
-    radial-gradient(circle 2px at 63% 48%, rgba(236, 72, 153, 0.26), transparent 100%),
-    radial-gradient(circle 3px at 78% 26%, rgba(168, 85, 247, 0.24), transparent 100%),
-    radial-gradient(circle 2px at 88% 66%, rgba(236, 72, 153, 0.2), transparent 100%),
-    radial-gradient(circle 3px at 55% 82%, rgba(168, 85, 247, 0.16), transparent 100%),
-    radial-gradient(circle 2px at 8% 78%, rgba(236, 72, 153, 0.18), transparent 100%);
-}
-
-/* Books — soft ruled-paper lines. */
-:root[data-category='book'] .app-ambient::before {
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(245, 158, 11, 0.028) 0 1px,
-    transparent 1px 32px
-  );
-}
-
-/* Games — neon arcade grid fading in toward the bottom. */
-:root[data-category='game'] .app-ambient::before {
-  background:
-    repeating-linear-gradient(90deg, rgba(20, 184, 166, 0.05) 0 1px, transparent 1px 56px),
-    repeating-linear-gradient(0deg, rgba(163, 230, 53, 0.04) 0 1px, transparent 1px 56px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 30%, black);
-  mask-image: linear-gradient(to bottom, transparent 30%, black);
-}
-
-/* Documentaries — topographic contour rings from the corner. */
-:root[data-category='documentary'] .app-ambient::before {
-  background: repeating-radial-gradient(
-    circle at 112% 112%,
-    rgba(16, 185, 129, 0.045) 0 1px,
-    transparent 1px 72px
-  );
-}
-
-/* YouTube — bold diagonal stripes, barely there. */
-:root[data-category='youtube'] .app-ambient::before {
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(249, 115, 22, 0.035) 0 2px,
-    transparent 2px 84px
-  );
-}
-
-/* ------------------------------------------------------------------ *
- * Category display typography — the big page title changes voice with
- * the category: cinematic caps for movies, serif italics for books,
- * arcade mono for games.
- * ------------------------------------------------------------------ */
-
-.cat-title {
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-}
-:root[data-category='movie'] .cat-title {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-:root[data-category='book'] .cat-title {
-  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
-  font-weight: 700;
-  font-style: italic;
-  letter-spacing: 0;
-}
-:root[data-category='game'] .cat-title {
-  font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-:root[data-category='youtube'] .cat-title {
-  letter-spacing: -0.045em;
-}
-
-/* ------------------------------------------------------------------ *
- * Motion + card polish
- * ------------------------------------------------------------------ */
+/* ---------------------------------------------------------------- motion */
 
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -273,10 +438,429 @@ button:not(:disabled),
   }
 }
 .page-in {
-  animation: page-in 0.35s ease both;
+  animation: page-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* Poster cards glow in the category's accent on hover. */
-.media-card:hover {
-  box-shadow: 0 18px 44px -14px color-mix(in srgb, var(--accent) 55%, transparent);
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.fade-in {
+  animation: fade-in 0.4s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Slow push-in on hero stills. */
+@keyframes kenburns {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.12) translate3d(-1.5%, -1%, 0);
+  }
+}
+.kenburns {
+  animation: kenburns 14s ease-out both;
+}
+
+@keyframes progress-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.pop {
+  animation: pop 0.35s ease;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shuffle {
+  0% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, -5vh, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(8vw, 105vh, 0) rotate(300deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* -------------------------------------------------------------- skeleton */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 20%,
+    var(--surface-2) 50%,
+    var(--surface) 80%
+  );
+  background-size: 1200px 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* ------------------------------------------------------ ambient textures */
+
+/* Fixed layer behind the app. Each world adds its own signature texture. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 600px at 8% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+    radial-gradient(900px 600px at 105% 8%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 70%);
+  transition: opacity 0.4s ease;
+}
+.ambient::before,
+.ambient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* Film grain for movies (SVG turbulence, very faint) + vignette. */
+[data-theme='movie'] .ambient::before,
+.grain::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+[data-theme='movie'] .ambient::after {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55));
+}
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.07;
+}
+
+/* TV — faint broadcast scanlines. */
+[data-theme='tv'] .ambient::before {
+  background: repeating-linear-gradient(0deg, rgba(148, 197, 255, 0.022) 0 1px, transparent 1px 4px);
+}
+
+/* Anime — halftone dots that fade toward the bottom. */
+[data-theme='anime'] .ambient::before {
+  background-image: radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 70%);
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+  opacity: 0.55;
+}
+
+/* Books — paper fibre. */
+[data-theme='book'] .ambient {
+  background:
+    radial-gradient(1100px 600px at 0% -10%, rgba(198, 139, 44, 0.16), transparent 70%),
+    radial-gradient(900px 600px at 100% 0%, rgba(163, 67, 42, 0.08), transparent 70%);
+}
+[data-theme='book'] .ambient::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .32  0 0 0 0 .18  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+}
+
+/* Games — perspective grid rising from the floor. */
+[data-theme='game'] .ambient::before {
+  background:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent-2) 7%, transparent) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--accent) 6%, transparent) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black);
+  mask-image: linear-gradient(to bottom, transparent 25%, black);
+}
+
+/* Documentaries — topographic contour rings. */
+[data-theme='documentary'] .ambient::before {
+  background: repeating-radial-gradient(circle at 110% 110%, color-mix(in srgb, var(--accent-2) 7%, transparent) 0 1px, transparent 1px 64px);
+}
+
+/* YouTube — clean, no texture, softer glow. */
+[data-theme='youtube'] .ambient {
+  background: radial-gradient(900px 500px at 0% -10%, rgba(255, 59, 59, 0.08), transparent 70%);
+}
+
+/* ------------------------------------------------------ world signatures */
+
+/* HUD chamfered corners for games. */
+.chamfer {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.chamfer-sm {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+/* Corner brackets (games hero). */
+.hud-brackets {
+  background:
+    linear-gradient(var(--accent), var(--accent)) top left / 22px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top left / 2px 22px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / 22px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / 2px 22px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / 22px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / 2px 22px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 22px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 2px 22px no-repeat;
+}
+
+/* 3D book: cover + spine + page block. --thick scales with page count. */
+.book3d {
+  --thick: 18px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: perspective(1200px) rotateY(-18deg);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.book3d:hover,
+.group:hover .book3d {
+  transform: perspective(1200px) rotateY(-6deg) translateY(-6px);
+}
+.book3d .cover {
+  position: relative;
+  border-radius: 2px 4px 4px 2px;
+  box-shadow:
+    inset 4px 0 6px -2px rgba(255, 255, 255, 0.25),
+    inset -1px 0 2px rgba(0, 0, 0, 0.2),
+    10px 18px 28px -10px rgba(40, 24, 10, 0.55);
+  overflow: hidden;
+}
+.book3d .cover::after {
+  /* spine crease */
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 6px;
+  width: 3px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(255, 255, 255, 0.18), transparent);
+}
+.book3d .pages {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  right: calc(var(--thick) * -1 + 2px);
+  width: var(--thick);
+  transform: rotateY(90deg);
+  transform-origin: left center;
+  background: repeating-linear-gradient(90deg, #f7f1e3 0 2px, #e4d8c1 2px 3px);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.18);
+}
+
+/* Bookshelf plank segment under a book (see BookCard `shelf`). */
+.plank {
+  height: 13px;
+  background: linear-gradient(#c49a6c, #93663c 70%, #7a522d);
+  box-shadow:
+    0 12px 16px -8px rgba(60, 35, 12, 0.5),
+    inset 0 2px 0 rgba(255, 238, 210, 0.5);
+}
+
+/* Paper card for book pages. */
+.paper {
+  background: var(--surface);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 40px -24px rgba(60, 35, 12, 0.35);
+}
+
+/* Editorial rules for documentaries. */
+.rule {
+  border-top: 1px solid var(--line);
+}
+.dropcap::first-letter {
+  float: left;
+  font-family: var(--display-font);
+  font-size: 4.2em;
+  line-height: 0.82;
+  padding: 0.06em 0.12em 0 0;
+  color: var(--accent);
+}
+
+/* Letterbox bars (movie trailer modal / hero). */
+.letterbox::before,
+.letterbox::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 7%;
+  background: #000;
+  z-index: 2;
+  pointer-events: none;
+}
+.letterbox::before {
+  top: 0;
+}
+.letterbox::after {
+  bottom: 0;
+}
+
+/* Cards lift + glow in the world's accent on hover. */
+.lift {
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 40px -18px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Range input styled with the accent. */
+input[type='range'].range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0 var(--pct, 0%),
+    var(--surface-2) var(--pct, 0%) 100%
+  );
+  outline: none;
+}
+input[type='range'].range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: 3px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+input[type='range'].range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: 3px solid var(--accent);
+}
+
+/* Vertical Japanese title (anime hero decoration). */
+.tategaki {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+/* Heroes slide up under the sticky bars (global 56/64px + world 48/52px). */
+.under-bars {
+  margin-top: -104px;
+}
+.under-top {
+  margin-top: -56px;
+}
+@media (min-width: 768px) {
+  .under-bars {
+    margin-top: -116px;
+  }
+  .under-top {
+    margin-top: -64px;
+  }
+}
+
+/* Per-world texture for scoped tiles (Home portals). Mirrors .ambient. */
+.texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+[data-theme='movie'] .texture {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+}
+[data-theme='tv'] .texture {
+  background: repeating-linear-gradient(0deg, rgba(148, 197, 255, 0.05) 0 1px, transparent 1px 4px);
+}
+[data-theme='anime'] .texture {
+  background-image: radial-gradient(color-mix(in srgb, var(--accent) 35%, transparent) 1px, transparent 1.6px);
+  background-size: 16px 16px;
+  -webkit-mask-image: linear-gradient(135deg, black, transparent 65%);
+  mask-image: linear-gradient(135deg, black, transparent 65%);
+}
+[data-theme='book'] .texture {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .32  0 0 0 0 .18  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  opacity: 0.25;
+  mix-blend-mode: multiply;
+}
+[data-theme='game'] .texture {
+  background:
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent-2) 12%, transparent) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--accent) 10%, transparent) 0 1px, transparent 1px 28px);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 80%);
+  mask-image: linear-gradient(to top, black, transparent 80%);
+}
+[data-theme='documentary'] .texture {
+  background: repeating-radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--accent-2) 14%, transparent) 0 1px, transparent 1px 22px);
 }

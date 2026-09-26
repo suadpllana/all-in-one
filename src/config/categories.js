@@ -1,13 +1,12 @@
-// Central definition of the categories. The per-category page template,
-// navbar, submenu and theming all read from here. Each category carries its
-// own visual identity: a two-tone accent gradient (`accent` -> `accent2`), a
-// tagline, and a `key` that index.css uses (via <html data-category>) to apply
-// signature backgrounds and typography per category.
+// Central definition of the categories ("worlds"). Each one carries its own
+// identity: palette (mirrored as a CSS theme in index.css, keyed by `key`),
+// icon, vocabulary (Watchlist / Want to Read / Backlog…), what progress it
+// tracks, and the card shape its items are shown in.
 
-// Library status enum (matches the Supabase `library_items.status` column):
-//   wishlist    -> "Watchlist" / "Wishlist" (planned)
-//   in_progress -> "Watching" / "Playing" / "Reading"
-//   completed   -> "Watched" / "Played" / "Read"
+// Library status enum (stored on every library row):
+//   wishlist    -> planned ("Watchlist", "Want to Read", "Backlog"…)
+//   in_progress -> "Watching" / "Reading" / "Playing"
+//   completed   -> "Watched" / "Read" / "Played"
 //   dropped     -> "Dropped"
 export const STATUS = {
   WISHLIST: 'wishlist',
@@ -21,139 +20,166 @@ export const CATEGORIES = [
     key: 'movie',
     route: '/movies',
     label: 'Movies',
-    icon: '🎬',
-    accent: '#e50914',
-    accent2: '#f5c518',
-    accentSoft: 'rgba(229, 9, 20, 0.15)',
+    short: 'Movies',
+    noun: ['film', 'films'],
+    icon: 'film',
+    accent: '#e5383b',
+    accent2: '#f2c14e',
     tagline: 'Lights down. Curtain up.',
     source: 'TMDB',
     ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    tabs: { plan: 'Watchlist', done: 'Diary' },
     // Movies are watched in one sitting — no in-progress state.
     noProgress: true,
+    tracking: null,
+    shape: 'poster',
   },
   {
     key: 'tv',
     route: '/tv',
     label: 'TV Shows',
-    icon: '📺',
+    short: 'TV',
+    noun: ['show', 'shows'],
+    icon: 'tv',
     accent: '#3b82f6',
     accent2: '#22d3ee',
-    accentSoft: 'rgba(59, 130, 246, 0.15)',
     tagline: 'Your next binge starts here.',
     source: 'TMDB',
     ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    tabs: { plan: 'Watchlist', progress: 'Watching', done: 'Finished' },
+    tracking: 'episodes',
+    shape: 'poster',
   },
   {
     key: 'anime',
     route: '/anime',
     label: 'Anime',
-    icon: '🌸',
-    accent: '#a855f7',
-    accent2: '#ec4899',
-    accentSoft: 'rgba(168, 85, 247, 0.15)',
-    tagline: 'From shonen to slice of life.',
-    source: 'Jikan / AniList',
-    // Jikan scores come from MyAnimeList.
-    ratingSource: 'MAL',
-    verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    short: 'Anime',
+    noun: ['series', 'series'],
+    icon: 'sakura',
+    accent: '#ff5c9d',
+    accent2: '#8f7cff',
+    tagline: 'From shōnen to slice of life.',
+    source: 'AniList / MyAnimeList',
+    ratingSource: 'AniList',
+    verbs: { plan: 'Plan to Watch', progress: 'Watching', done: 'Completed' },
+    tabs: { plan: 'Plan to Watch', progress: 'Watching', done: 'Completed' },
+    tracking: 'episodes',
+    shape: 'poster',
   },
   {
     key: 'book',
     route: '/books',
     label: 'Books',
-    icon: '📚',
-    accent: '#f59e0b',
-    accent2: '#fde68a',
-    accentSoft: 'rgba(245, 158, 11, 0.15)',
-    tagline: 'A quiet shelf of good pages.',
-    source: 'Google Books',
-    ratingSource: 'Google Books',
-    verbs: { plan: 'Wishlist', progress: 'Reading', done: 'Read' },
+    short: 'Books',
+    noun: ['book', 'books'],
+    icon: 'book',
+    accent: '#a3432a',
+    accent2: '#c68b2c',
+    tagline: 'A quiet room full of good pages.',
+    source: 'Open Library / Google Books',
+    ratingSource: 'Readers',
+    verbs: { plan: 'Want to Read', progress: 'Reading', done: 'Read' },
+    tabs: { plan: 'Want to Read', progress: 'Reading', done: 'Read' },
+    tracking: 'pages',
+    shape: 'book',
   },
   {
     key: 'game',
     route: '/games',
     label: 'Games',
-    icon: '🎮',
-    accent: '#14b8a6',
-    accent2: '#a3e635',
-    accentSoft: 'rgba(20, 184, 166, 0.15)',
+    short: 'Games',
+    noun: ['game', 'games'],
+    icon: 'gamepad',
+    accent: '#b6f23a',
+    accent2: '#25e0c1',
     tagline: 'Press start on something new.',
     source: 'RAWG',
-    ratingSource: 'RAWG',
-    verbs: { plan: 'Wishlist', progress: 'Playing', done: 'Played' },
+    ratingSource: 'Metacritic',
+    verbs: { plan: 'Backlog', progress: 'Playing', done: 'Played' },
+    tabs: { plan: 'Backlog', progress: 'Playing', done: 'Played' },
+    tracking: 'hours',
+    shape: 'wide',
   },
   {
     key: 'documentary',
     route: '/documentaries',
     label: 'Documentaries',
-    icon: '🎞️',
-    accent: '#10b981',
-    accent2: '#0ea5e9',
-    accentSoft: 'rgba(16, 185, 129, 0.15)',
+    short: 'Docs',
+    noun: ['documentary', 'documentaries'],
+    icon: 'compass',
+    accent: '#e2a93b',
+    accent2: '#8cc084',
     tagline: 'True stories, told beautifully.',
     source: 'TMDB',
     ratingSource: 'TMDB',
     verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    tabs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    tracking: null,
+    shape: 'poster',
   },
   {
     key: 'youtube',
     route: '/youtube',
     label: 'YouTube',
-    icon: '▶️',
-    accent: '#f97316',
-    accent2: '#dc2626',
-    accentSoft: 'rgba(249, 115, 22, 0.15)',
-    tagline: 'Long-form worth your watch.',
+    short: 'YouTube',
+    noun: ['video', 'videos'],
+    icon: 'play',
+    accent: '#ff3b3b',
+    accent2: '#ff8a3d',
+    tagline: 'Long-form worth your time.',
     source: 'YouTube',
     ratingSource: 'YouTube',
-    verbs: { plan: 'Watchlist', progress: 'Watching', done: 'Watched' },
+    verbs: { plan: 'Watch Later', progress: 'Watching', done: 'Watched' },
+    tabs: { plan: 'Watch Later', progress: 'Watching', done: 'Watched' },
+    tracking: null,
+    shape: 'video',
   },
 ]
 
-// Push a category's palette + identity onto the document so CSS can theme the
-// whole app (ambient background, title typography, accent gradients).
-export function applyCategoryTheme(category) {
-  const root = document.documentElement
-  root.style.setProperty('--accent', category.accent)
-  root.style.setProperty('--accent-2', category.accent2)
-  root.style.setProperty('--accent-soft', category.accentSoft)
-  root.dataset.category = category.key
+export const CATEGORY_BY_KEY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]))
+
+// Background colour per theme, for <meta name="theme-color">.
+export const THEME_BG = {
+  home: '#09090e',
+  movie: '#0a0808',
+  tv: '#060a13',
+  anime: '#0d0a1a',
+  book: '#f3ece0',
+  game: '#06080b',
+  documentary: '#0c0e0b',
+  youtube: '#0f0f0f',
 }
 
-export const CATEGORY_BY_KEY = Object.fromEntries(
-  CATEGORIES.map((c) => [c.key, c]),
-)
+export const plural = (category, n) => `${n} ${category.noun[n === 1 ? 0 : 1]}`
 
-export const CATEGORY_BY_ROUTE = Object.fromEntries(
-  CATEGORIES.map((c) => [c.route, c]),
-)
-
-// The secondary submenu shown inside every category page. Categories with
-// `noProgress` (e.g. movies) skip the in-progress tab.
+// The submenu inside a category page: Discover + one tab per library status.
+// Categories with `noProgress` (movies) skip the in-progress tab.
 export function getSubmenu(category) {
-  const { verbs, noProgress } = category
+  const { tabs, noProgress } = category
   return [
     { key: 'discover', label: 'Discover', status: null },
-    { key: 'plan', label: verbs.plan, status: STATUS.WISHLIST },
-    ...(noProgress
-      ? []
-      : [{ key: 'progress', label: verbs.progress, status: STATUS.IN_PROGRESS }]),
-    { key: 'done', label: verbs.done, status: STATUS.COMPLETED },
+    { key: 'plan', label: tabs.plan, status: STATUS.WISHLIST },
+    ...(noProgress ? [] : [{ key: 'progress', label: tabs.progress, status: STATUS.IN_PROGRESS }]),
+    { key: 'done', label: tabs.done, status: STATUS.COMPLETED },
   ]
 }
 
-// Labels for the quick-add / status dropdown attached to every card.
-// Categories with `noProgress` skip the in-progress option.
+// Status choices offered for an item (segmented control / menus).
 export function getStatusOptions(category) {
   const { verbs, noProgress } = category
   return [
-    { status: STATUS.WISHLIST, label: `Add to ${verbs.plan}` },
+    { status: STATUS.WISHLIST, label: verbs.plan, action: `Add to ${verbs.plan}` },
     ...(noProgress
       ? []
-      : [{ status: STATUS.IN_PROGRESS, label: `Mark as ${verbs.progress}` }]),
-    { status: STATUS.COMPLETED, label: `Mark as ${verbs.done}` },
+      : [{ status: STATUS.IN_PROGRESS, label: verbs.progress, action: `Mark as ${verbs.progress}` }]),
+    { status: STATUS.COMPLETED, label: verbs.done, action: `Mark as ${verbs.done}` },
   ]
+}
+
+export function statusLabel(category, status) {
+  if (status === STATUS.DROPPED) return 'Dropped'
+  return getStatusOptions(category).find((o) => o.status === status)?.label ?? 'Saved'
 }
