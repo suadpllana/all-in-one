@@ -13,6 +13,7 @@ import Img from '../../components/ui/Img'
 import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
+import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -122,6 +123,7 @@ function TrackerRow({ item }) {
           <Button size="sm" variant="ghost" icon="undo" onClick={() => a.bump(-1)} disabled={!p?.episode && (p?.season ?? 1) <= 1}>
             Undo
           </Button>
+          <StatusMenu item={item} className="ml-auto" />
         </div>
       </div>
     </li>

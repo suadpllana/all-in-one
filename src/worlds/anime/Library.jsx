@@ -15,6 +15,7 @@ import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
 import { StarRatingInput } from '../../components/ui/Stars'
+import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -148,8 +149,9 @@ function ListRow({ item, completed }) {
         )}
         <ProgressBar value={completed ? 1 : (info?.pct ?? 0)} className="mt-2" />
       </div>
-      <div className="flex items-center md:justify-end">
+      <div className="flex items-center gap-2 md:justify-end">
         <StarRatingInput value={stars} onRate={a.rate} size={17} />
+        <StatusMenu item={item} className="ml-auto md:ml-0" />
       </div>
     </li>
   )

@@ -14,8 +14,8 @@ function url(path, params) {
 }
 
 // Titles/descriptions arrive HTML-escaped.
-const decode = (s = '') =>
-  s
+const decode = (s) =>
+  (s || '')
     .replace(/&amp;/g, '&')
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')

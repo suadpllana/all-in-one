@@ -3,7 +3,10 @@ import { toast } from '../lib/toast'
 import { isFinished, stepProgress } from '../lib/progress'
 import { readRow, useLibrary } from './useLibrary'
 
-const shortTitle = (t = '') => (t.length > 34 ? `${t.slice(0, 32).trim()}…` : t)
+const shortTitle = (title) => {
+  const t = title || ''
+  return t.length > 34 ? `${t.slice(0, 32).trim()}…` : t
+}
 
 // Progress that represents "all of it" when an item is marked complete, so
 // stats and progress bars agree with the status.

@@ -6,8 +6,10 @@ import QuickActions from '../library/QuickActions'
 import Icon from '../ui/Icon'
 import Img from '../ui/Img'
 
-export function ChannelAvatar({ name = '', src, className }) {
-  const initial = name.replace(/^@/, '').charAt(0).toUpperCase() || '?'
+export function ChannelAvatar({ name, src, className }) {
+  // `name` can be null (items saved without a channel), which a default
+  // parameter wouldn't catch.
+  const initial = (name || '').replace(/^@/, '').charAt(0).toUpperCase() || '?'
   return (
     <span className={cn('relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-accent-grad text-sm font-bold text-white', className)}>
       {initial}
