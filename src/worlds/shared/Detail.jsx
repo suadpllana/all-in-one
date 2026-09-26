@@ -132,8 +132,8 @@ export function PeopleRail({ people, round = false, label = 'Cast', inset = fals
   )
 }
 
-const initials = (name = '') =>
-  name
+const initials = (name) =>
+  (name || '')
     .split(/\s+/)
     .slice(0, 2)
     .map((w) => w[0])

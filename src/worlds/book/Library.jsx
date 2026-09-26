@@ -12,6 +12,7 @@ import ProgressControl from '../../components/library/ProgressControl'
 import { Button } from '../../components/ui/Button'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
+import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -142,6 +143,7 @@ function ReadingDesk({ item }) {
           <Button size="sm" variant="primary" icon="check" onClick={() => a.setStatus(STATUS.COMPLETED)}>
             Finished it
           </Button>
+          <StatusMenu item={item} className="ml-auto" />
         </div>
       </div>
     </article>

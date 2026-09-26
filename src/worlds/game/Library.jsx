@@ -16,6 +16,7 @@ import Img from '../../components/ui/Img'
 import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
+import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -114,6 +115,7 @@ function SessionCard({ item }) {
           <Button size="sm" variant="ghost" icon="trophy" onClick={() => a.setStatus(STATUS.COMPLETED)} className="ml-auto rounded-none">
             Beat it
           </Button>
+          <StatusMenu item={item} />
         </div>
       </div>
     </article>
