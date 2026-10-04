@@ -9,13 +9,14 @@ import { gridClass } from '../../lib/grid'
 import { detailPath } from '../../lib/paths'
 import { getProgress } from '../../lib/progress'
 import { toStars } from '../../lib/rating'
+import { NoteSlot } from '../../components/library/NoteEditor'
+import StatusMenu from '../../components/library/StatusMenu'
 import { Button, IconButton } from '../../components/ui/Button'
 import Img from '../../components/ui/Img'
 import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
 import { StarRatingInput } from '../../components/ui/Stars'
-import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -128,6 +129,7 @@ function ListRow({ item, completed }) {
           {item.title}
         </Link>
         <p className="truncate text-xs text-muted">{formatLine(item)}</p>
+        {completed && <NoteSlot item={item} className="mt-1.5" />}
         {airing && (
           <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] font-bold text-accent">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" /> Ep {airing.episode} in {airing.in}

@@ -7,13 +7,14 @@ import { gridClass } from '../../lib/grid'
 import { detailPath } from '../../lib/paths'
 import { getProgress } from '../../lib/progress'
 import PosterCard from '../../components/cards/PosterCard'
+import { NoteSlot } from '../../components/library/NoteEditor'
+import StatusMenu from '../../components/library/StatusMenu'
 import { Button } from '../../components/ui/Button'
 import Icon from '../../components/ui/Icon'
 import Img from '../../components/ui/Img'
 import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
-import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -184,19 +185,21 @@ function ShowGrid({ category, tab, query }) {
           />
           <div className={cn(gridClass('poster'), 'mt-8')}>
             {items.map((s) => (
-              <PosterCard
-                key={s.externalId}
-                item={s}
-                size="fill"
-                meta={[s.seasons ? `${s.seasons} season${s.seasons > 1 ? 's' : ''}` : s.year, s.network].filter(Boolean).join(' · ')}
-                topLeft={
-                  s._favorite ? (
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-rose-400 backdrop-blur">
-                      <Icon name="heartFill" className="h-3.5 w-3.5" />
-                    </span>
-                  ) : null
-                }
-              />
+              <div key={s.externalId}>
+                <PosterCard
+                  item={s}
+                  size="fill"
+                  meta={[s.seasons ? `${s.seasons} season${s.seasons > 1 ? 's' : ''}` : s.year, s.network].filter(Boolean).join(' · ')}
+                  topLeft={
+                    s._favorite ? (
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-rose-400 backdrop-blur">
+                        <Icon name="heartFill" className="h-3.5 w-3.5" />
+                      </span>
+                    ) : null
+                  }
+                />
+                {done && <NoteSlot item={s} compact className="mt-2" />}
+              </div>
             ))}
           </div>
         </>

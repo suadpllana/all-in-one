@@ -84,7 +84,7 @@ function Feature({ d, category }) {
           )}
           <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <RatingBox item={d} hint={a.status === STATUS.COMPLETED ? 'How did it stay with you?' : 'Rating marks it as watched.'} />
-            <ReviewBox item={d} title="Your take" placeholder="What did you learn? What stayed with you?" />
+            <ReviewBox item={d} />
           </section>
         </div>
         <aside className="space-y-5">

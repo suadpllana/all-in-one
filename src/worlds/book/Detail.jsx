@@ -136,7 +136,7 @@ function BookBody({ b, category }) {
 
           <section className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
             <RatingBox item={b} hint={done ? 'Five stars means you’d press it on a friend.' : 'Rating marks the book as read.'} />
-            <ReviewBox item={b} title="Your notes" placeholder="Favourite line, a thought to keep, who to lend it to…" />
+            <ReviewBox item={b} />
           </section>
 
           <div className="paper mt-5 rounded-card p-5 ring-1 ring-line">

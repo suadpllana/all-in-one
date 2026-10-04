@@ -142,7 +142,7 @@ function MovieBody({ m, category }) {
               hint={watched ? 'Half stars welcome.' : 'Rating logs the film as watched in your diary.'}
             />
             {watched ? (
-              <ReviewBox item={m} placeholder="A few words for your diary…" />
+              <ReviewBox item={m} />
             ) : (
               <div className="flex flex-col justify-center rounded-card bg-surface p-5 ring-1 ring-line">
                 <p className="font-display text-xl text-fg">Your diary</p>

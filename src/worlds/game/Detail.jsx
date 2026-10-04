@@ -134,7 +134,7 @@ function GameBody({ g, category }) {
 
           <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <RatingBox item={g} className="chamfer rounded-none" hint="Rating logs the game as played." />
-            <ReviewBox item={g} title="Your notes" className="chamfer rounded-none" placeholder="Best boss, worst level, would you replay it?" />
+            <ReviewBox item={g} className="chamfer rounded-none" />
           </section>
         </div>
 

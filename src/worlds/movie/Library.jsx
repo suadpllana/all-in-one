@@ -10,6 +10,7 @@ import { gridClass } from '../../lib/grid'
 import { detailPath } from '../../lib/paths'
 import { toStars } from '../../lib/rating'
 import PosterCard from '../../components/cards/PosterCard'
+import { NoteSlot } from '../../components/library/NoteEditor'
 import { Button } from '../../components/ui/Button'
 import Icon from '../../components/ui/Icon'
 import Img from '../../components/ui/Img'
@@ -188,7 +189,10 @@ function Diary({ category, query }) {
           {view === 'grid' ? (
             <div className={cn(gridClass('poster'), 'mt-8')}>
               {items.map((m) => (
-                <PosterCard key={m.externalId} item={m} size="fill" />
+                <div key={m.externalId}>
+                  <PosterCard item={m} size="fill" />
+                  <NoteSlot item={m} compact className="mt-2" />
+                </div>
               ))}
             </div>
           ) : (
@@ -222,35 +226,32 @@ function DiaryList({ items }) {
           </h2>
           <ol className="divide-y divide-line">
             {g.items.map(({ m, d }) => (
-              <li key={m.externalId}>
-                <Link
-                  to={detailPath(m)}
-                  className="group grid grid-cols-[52px_44px_1fr] items-center gap-4 rounded-card px-2 py-3 transition-colors hover:bg-surface sm:grid-cols-[64px_52px_1fr_auto]"
-                >
-                  <span className="text-center">
-                    <span className="display block text-4xl leading-none text-fg">{d.getDate()}</span>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{WEEKDAYS[d.getDay()]}</span>
-                  </span>
-                  <Img src={m.posterUrl} title={m.title} className="aspect-[2/3] w-full rounded-[4px] ring-1 ring-line" />
-                  <span className="min-w-0">
-                    <span className="block truncate text-[15px] font-semibold text-fg group-hover:text-accent">
-                      {m.title} <span className="font-normal text-muted">{m.year}</span>
-                    </span>
-                    {m._review ? (
-                      <span className="mt-0.5 block truncate text-sm italic text-fg-2">“{m._review}”</span>
-                    ) : (
-                      <span className="mt-0.5 block truncate text-sm text-muted">
-                        {[formatMinutes(m.runtime), genreLabels(m, 2).join(', ')].filter(Boolean).join(' · ')}
-                      </span>
-                    )}
-                    <span className="mt-1.5 flex items-center gap-2 sm:hidden">
-                      <DiaryMarks m={m} />
-                    </span>
-                  </span>
-                  <span className="hidden items-center gap-3 sm:flex">
+              <li
+                key={m.externalId}
+                className="group relative grid grid-cols-[52px_44px_1fr] items-center gap-4 rounded-card px-2 py-3 transition-colors hover:bg-surface sm:grid-cols-[64px_52px_1fr_auto]"
+              >
+                <span className="text-center">
+                  <span className="display block text-4xl leading-none text-fg">{d.getDate()}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{WEEKDAYS[d.getDay()]}</span>
+                </span>
+                <Img src={m.posterUrl} title={m.title} className="aspect-[2/3] w-full rounded-[4px] ring-1 ring-line" />
+                <div className="min-w-0">
+                  <Link to={detailPath(m)} className="block truncate text-[15px] font-semibold text-fg after:absolute after:inset-0 group-hover:text-accent">
+                    {m.title} <span className="font-normal text-muted">{m.year}</span>
+                  </Link>
+                  {!m._review && (
+                    <p className="mt-0.5 truncate text-sm text-muted">
+                      {[formatMinutes(m.runtime), genreLabels(m, 2).join(', ')].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                  <NoteSlot item={m} className="mt-1" />
+                  <p className="mt-1.5 flex items-center gap-2 sm:hidden">
                     <DiaryMarks m={m} />
-                  </span>
-                </Link>
+                  </p>
+                </div>
+                <span className="hidden items-center gap-3 sm:flex">
+                  <DiaryMarks m={m} />
+                </span>
               </li>
             ))}
           </ol>
@@ -266,7 +267,6 @@ function DiaryMarks({ m }) {
     <>
       {stars != null ? <Stars value={stars} size={15} /> : <span className="text-xs text-muted">Not rated</span>}
       {m._favorite && <Icon name="heartFill" className="h-4 w-4 text-rose-500" />}
-      {m._review && <Icon name="pen" className="h-3.5 w-3.5 text-muted" />}
     </>
   )
 }

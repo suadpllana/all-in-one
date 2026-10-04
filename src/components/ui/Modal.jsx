@@ -7,6 +7,12 @@ import { IconButton } from './Button'
 // scroll lock, focus moved into the dialog and restored on close.
 export default function Modal({ open, onClose, label, children, className, bare = false }) {
   const ref = useRef(null)
+  // Latest onClose without re-running the open effect (which would steal
+  // focus back to the panel) when a parent passes a new callback each render.
+  const closeRef = useRef(onClose)
+  useEffect(() => {
+    closeRef.current = onClose
+  })
 
   useEffect(() => {
     if (!open) return
@@ -15,7 +21,7 @@ export default function Modal({ open, onClose, label, children, className, bare 
     document.body.style.overflow = 'hidden'
     ref.current?.focus()
     function onKey(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
     }
     document.addEventListener('keydown', onKey)
     return () => {
@@ -23,7 +29,7 @@ export default function Modal({ open, onClose, label, children, className, bare 
       document.removeEventListener('keydown', onKey)
       prevFocus?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 

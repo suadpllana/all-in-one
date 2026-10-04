@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { getApi } from '../../api'
+import { CATEGORY_BY_KEY } from '../../config/categories'
 import { useItemActions } from '../../hooks/useItemActions'
 import { cn } from '../../lib/cn'
 import { toast } from '../../lib/toast'
@@ -156,10 +157,12 @@ export function RatingBox({ item, label = 'Your rating', hint, className }) {
   )
 }
 
-// A few lines of your own — a review, reading notes, a hot take.
-export function ReviewBox({ item, title = 'Your review', placeholder = 'What did you think?', className }) {
+// Your note on it — what it was, what you thought. Same note the finished
+// lists and the note editor show.
+export function ReviewBox({ item, title = 'Your note', className }) {
   const a = useItemActions(item)
-  const saved = a.entry?.review || ''
+  const placeholder = CATEGORY_BY_KEY[item.category]?.notePrompt || 'What did you think?'
+  const saved = a.note || ''
   const [draft, setDraft] = useState(saved)
   const [editing, setEditing] = useState(false)
   // Pick up a review edited on another device while not editing.
@@ -205,7 +208,7 @@ export function ReviewBox({ item, title = 'Your review', placeholder = 'What did
                 size="sm"
                 variant="primary"
                 onClick={() => {
-                  a.setReview(draft)
+                  a.saveNote(draft)
                   setEditing(false)
                 }}
               >

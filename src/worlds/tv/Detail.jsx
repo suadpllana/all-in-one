@@ -133,7 +133,7 @@ function ShowBody({ s, category }) {
 
         <aside className="space-y-5">
           <RatingBox item={s} label="Your rating" hint="Rate the whole show — you can change it any time." />
-          {a.status === STATUS.COMPLETED && <ReviewBox item={s} placeholder="How was it? Did the ending land?" />}
+          {a.status === STATUS.COMPLETED && <ReviewBox item={s} />}
           <div className="rounded-card bg-surface p-5 ring-1 ring-line">
             <h3 className="kicker text-muted">Details</h3>
             <Facts
