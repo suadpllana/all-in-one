@@ -1,5 +1,6 @@
 // Minimal toast store (no dependency). toast('Added to Watchlist', {
-// action: { label: 'Undo', onClick } }) — rendered by <Toaster/>.
+// action: { label: 'Undo', onClick } }) — rendered by <Toaster/>. Pass
+// `actions: [...]` for more than one button.
 
 let toasts = []
 let nextId = 1
@@ -9,8 +10,8 @@ function emit() {
   for (const fn of listeners) fn()
 }
 
-export function toast(message, { action, icon, tone, duration = 4500 } = {}) {
-  const t = { id: nextId++, message, action, icon, tone }
+export function toast(message, { action, actions, icon, tone, duration = 4500 } = {}) {
+  const t = { id: nextId++, message, actions: (actions || [action]).filter(Boolean), icon, tone }
   // Keep the stack short; newest last.
   toasts = [...toasts.slice(-2), t]
   emit()

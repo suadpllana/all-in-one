@@ -22,18 +22,19 @@ export default function Toaster() {
             <Icon name={t.icon || 'check'} className="h-4 w-4" strokeWidth={2.4} />
           </span>
           <span className="min-w-0 flex-1 font-medium">{t.message}</span>
-          {t.action && (
+          {t.actions.map((action) => (
             <button
+              key={action.label}
               type="button"
               onClick={() => {
-                t.action.onClick()
+                action.onClick()
                 dismissToast(t.id)
               }}
-              className="rounded-lg px-2.5 py-1 text-[13px] font-bold text-accent hover:bg-accent-soft"
+              className="shrink-0 rounded-lg px-2.5 py-1 text-[13px] font-bold text-accent hover:bg-accent-soft"
             >
-              {t.action.label}
+              {action.label}
             </button>
-          )}
+          ))}
           <button
             type="button"
             aria-label="Dismiss"

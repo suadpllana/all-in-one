@@ -4,6 +4,7 @@ import TopBar from './TopBar'
 import MobileBar from './MobileBar'
 import CommandPalette from './CommandPalette'
 import Toaster from '../ui/Toaster'
+import { NoteEditorHost } from '../library/NoteEditor'
 
 export default function Layout() {
   const { pathname } = useLocation()
@@ -51,6 +52,7 @@ export default function Layout() {
       </main>
       <MobileBar onSearch={() => setPaletteOpen(true)} />
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
+      <NoteEditorHost />
       <Toaster />
     </div>
   )

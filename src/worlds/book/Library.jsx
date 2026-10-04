@@ -8,11 +8,12 @@ import { gridClass } from '../../lib/grid'
 import { detailPath } from '../../lib/paths'
 import { toStars } from '../../lib/rating'
 import BookCard from '../../components/cards/BookCard'
+import { NoteSlot } from '../../components/library/NoteEditor'
 import ProgressControl from '../../components/library/ProgressControl'
+import StatusMenu from '../../components/library/StatusMenu'
 import { Button } from '../../components/ui/Button'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
-import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -152,6 +153,16 @@ function ReadingDesk({ item }) {
 
 /* ---------------------------------------------------------------- read */
 
+// A finished book on the shelf, with your note on it underneath.
+function ReadBook({ item }) {
+  return (
+    <div>
+      <BookCard item={item} size="fill" shelf />
+      <NoteSlot item={item} compact className="mt-2" />
+    </div>
+  )
+}
+
 function ReadLog({ category, query }) {
   const [sort, setSort] = useState('recent')
   const { all, items, isLoading } = useLibraryItems('book', STATUS.COMPLETED, query, sort)
@@ -208,7 +219,7 @@ function ReadLog({ category, query }) {
                 </h2>
                 <div className={cn(gridClass('book'), 'mt-8 gap-x-8')}>
                   {g.items.map((b) => (
-                    <BookCard key={b.externalId} item={b} size="fill" shelf />
+                    <ReadBook key={b.externalId} item={b} />
                   ))}
                 </div>
               </section>
@@ -216,7 +227,7 @@ function ReadLog({ category, query }) {
           ) : (
             <div className={cn(gridClass('book'), 'mt-10 gap-x-8')}>
               {items.map((b) => (
-                <BookCard key={b.externalId} item={b} size="fill" shelf />
+                <ReadBook key={b.externalId} item={b} />
               ))}
             </div>
           )}

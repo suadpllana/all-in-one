@@ -241,7 +241,7 @@ function AnimeBody({ a, category }) {
           <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <RatingBox item={a} hint="Scored out of five — half stars welcome." />
             {act.status === STATUS.COMPLETED ? (
-              <ReviewBox item={a} placeholder="Best episode? Best girl? Say it." />
+              <ReviewBox item={a} />
             ) : (
               <div className="flex flex-col justify-center rounded-card bg-surface p-5 ring-1 ring-line">
                 <p className="font-display text-xl text-fg">Track it episode by episode</p>

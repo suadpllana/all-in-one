@@ -1,4 +1,5 @@
 import { CATEGORY_BY_KEY, STATUS, statusLabel } from '../config/categories'
+import { openNote } from '../lib/noteEditor'
 import { toast } from '../lib/toast'
 import { isFinished, stepProgress } from '../lib/progress'
 import { readRow, useLibrary } from './useLibrary'
@@ -39,6 +40,8 @@ export function useItemActions(item) {
     label: 'Undo',
     onClick: () => (prev ? lib.restore(prev) : lib.remove(item.category, item.externalId)),
   })
+  // Finishing something is the moment to say what you thought of it.
+  const noteAction = (prev) => ({ label: prev?.review ? 'Edit note' : 'Add note', onClick: () => openNote(item) })
 
   function setStatus(next) {
     const prev = readRow(item.category, item.externalId)
@@ -60,7 +63,11 @@ export function useItemActions(item) {
         : next === STATUS.IN_PROGRESS
           ? [`Now ${category.verbs.progress.toLowerCase()}`, 'play']
           : [`Marked as ${category.verbs.done.toLowerCase()}`, 'check']
-    toast(`${msg} · ${shortTitle(item.title)}`, { icon, action: undo(prev) })
+    toast(`${msg} · ${shortTitle(item.title)}`, {
+      icon,
+      actions: next === STATUS.COMPLETED ? [noteAction(prev), undo(prev)] : [undo(prev)],
+      duration: next === STATUS.COMPLETED ? 7000 : undefined,
+    })
   }
 
   function remove() {
@@ -89,9 +96,23 @@ export function useItemActions(item) {
     })
   }
 
-  function setReview(text) {
-    lib.update(item, { review: text?.trim() ? text.trim() : null }, STATUS.COMPLETED)
-    toast('Review saved', { icon: 'pen' })
+  // Your note — and, from the note editor, your rating — as one change with
+  // one toast and one Undo. Notes are for finished things, so writing one on
+  // something not yet in your library logs it as finished. Returns whether
+  // anything changed.
+  function saveNote(text, stars) {
+    const prev = readRow(item.category, item.externalId)
+    const review = text?.trim() ? text.trim() : null
+    const prevReview = prev?.review ?? null
+    const ratingChanged = stars !== undefined && stars !== (prev?.user_rating ?? null)
+    if (review === prevReview && !ratingChanged) return false
+    const patch = { review }
+    if (ratingChanged) patch.userRating = stars
+    lib.update(item, patch, STATUS.COMPLETED)
+    const msg =
+      review === prevReview ? 'Rating saved' : !review ? 'Note deleted' : prevReview ? 'Note updated' : 'Note saved'
+    toast(`${msg} · ${shortTitle(item.title)}`, { icon: review === prevReview ? 'star' : !review ? 'trash' : 'pen', action: undo(prev) })
+    return true
   }
 
   // Set progress explicitly (page 212, S2·E4, 38 hours). Starting progress on
@@ -105,7 +126,7 @@ export function useItemActions(item) {
     else if (!prev || prev.status === STATUS.WISHLIST) patch.status = STATUS.IN_PROGRESS
     lib.update(item, patch, STATUS.IN_PROGRESS)
     if (finished && prev?.status !== STATUS.COMPLETED) {
-      toast(`Finished! ${shortTitle(item.title)} — rate it?`, { icon: 'trophy', action: undo(prev) })
+      toast(`Finished! ${shortTitle(item.title)}`, { icon: 'trophy', actions: [noteAction(prev), undo(prev)], duration: 7000 })
     } else if (!silent) {
       toast(progressMessage(item.category, progress), { icon: 'check', action: undo(prev) })
     }
@@ -127,11 +148,12 @@ export function useItemActions(item) {
     favorite: Boolean(entry?.favorite),
     userRating: entry?.user_rating ?? null,
     progress: entry?.progress ?? null,
+    note: entry?.review ?? null,
     setStatus,
     remove,
     rate,
     toggleFavorite,
-    setReview,
+    saveNote,
     setProgress,
     bump,
   }

@@ -148,7 +148,7 @@ function Watch({ v, category }) {
               <h3 className="font-display text-lg text-fg">Your rating</h3>
               <StarRatingInput value={stars} onRate={a.rate} size={26} className="mt-3" />
             </div>
-            <ReviewBox item={v} title="Notes" placeholder="Timestamps, takeaways, things to look up…" className="rounded-2xl" />
+            <ReviewBox item={v} className="rounded-2xl" />
           </div>
         </div>
 

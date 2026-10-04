@@ -11,12 +11,13 @@ import { detailPath } from '../../lib/paths'
 import { formatHours, getProgress } from '../../lib/progress'
 import GameCard from '../../components/cards/GameCard'
 import Platforms from '../../components/cards/Platforms'
+import { NoteSlot } from '../../components/library/NoteEditor'
+import StatusMenu from '../../components/library/StatusMenu'
 import { Button, IconButton } from '../../components/ui/Button'
 import Img from '../../components/ui/Img'
 import { ProgressBar } from '../../components/ui/Progress'
 import { GridSkeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/States'
-import StatusMenu from '../../components/library/StatusMenu'
 import { useLibraryItems } from '../shared/library'
 import LibraryToolbar, { Summary } from '../shared/LibraryToolbar'
 import PickForMe from '../shared/PickForMe'
@@ -168,9 +169,16 @@ function Collection({ category, tab, query }) {
             onSort={setSort}
           />
           <div className={cn(gridClass('wide'), 'mt-8')}>
-            {items.map((g) => (
-              <GameCard key={g.externalId} item={g} size="fill" />
-            ))}
+            {items.map((g) =>
+              played ? (
+                <div key={g.externalId}>
+                  <GameCard item={g} size="fill" />
+                  <NoteSlot item={g} className="mt-2.5" />
+                </div>
+              ) : (
+                <GameCard key={g.externalId} item={g} size="fill" />
+              ),
+            )}
           </div>
         </>
       )}

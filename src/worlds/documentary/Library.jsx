@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { STATUS } from '../../config/categories'
 import { useItemActions } from '../../hooks/useItemActions'
-import { cn } from '../../lib/cn'
 import { formatMinutes } from '../../lib/duration'
 import { formatDate } from '../../lib/format'
 import { detailPath } from '../../lib/paths'
 import { toStars } from '../../lib/rating'
+import { NoteSlot } from '../../components/library/NoteEditor'
 import QuickActions from '../../components/library/QuickActions'
 import { Button } from '../../components/ui/Button'
 import Img from '../../components/ui/Img'
@@ -96,7 +96,8 @@ function Entry({ item, index, done }) {
         <Link to={detailPath(item)} className="mt-1 block font-display text-3xl leading-tight text-fg after:absolute after:inset-0 group-hover:text-accent">
           {item.title}
         </Link>
-        <Deck text={item._review ? `“${item._review}”` : item.overview} lines={2} className={cn('mt-2 text-sm leading-relaxed', item._review && 'italic')} />
+        {!(done && item._review) && <Deck text={item.overview} lines={2} className="mt-2 text-sm leading-relaxed" />}
+        {done && <NoteSlot item={item} className="mt-2" />}
         <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-muted">
           {[item.year, formatMinutes(item.runtime), done && item._completedAt ? `Watched ${formatDate(item._completedAt)}` : null].filter(Boolean).join('  ·  ')}
         </p>

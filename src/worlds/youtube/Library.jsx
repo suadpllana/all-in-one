@@ -9,6 +9,7 @@ import { compact, timeAgo } from '../../lib/format'
 import { detailPath } from '../../lib/paths'
 import { toStars } from '../../lib/rating'
 import VideoCard from '../../components/cards/VideoCard'
+import { NoteSlot } from '../../components/library/NoteEditor'
 import { Button, IconButton } from '../../components/ui/Button'
 import Icon from '../../components/ui/Icon'
 import Img from '../../components/ui/Img'
@@ -75,6 +76,7 @@ export default function YouTubeLibrary({ category, tab, query }) {
           <div key={v.externalId}>
             <VideoCard item={v} meta={done && v._completedAt ? `Watched ${timeAgo(v._completedAt)}` : undefined} />
             {toStars(v._userRating) != null && <Stars value={toStars(v._userRating)} size={13} className="ml-12 mt-1.5" />}
+            {done && <NoteSlot item={v} compact className="ml-12 mt-1.5 w-[calc(100%-3rem)]" />}
           </div>
         ))}
       </div>
